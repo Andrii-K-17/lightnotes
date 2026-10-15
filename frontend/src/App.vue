@@ -1,3 +1,9 @@
+<script setup lang="ts">
+import { Button } from '@/components/ui/button'
+</script>
+
 <template>
-  <h1 class="p-4 text-2xl font-semibold">LightNotes</h1>
+  <div class="p-4">
+    <Button>LightNotes</Button>
+  </div>
 </template>
