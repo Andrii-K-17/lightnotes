@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <ItemGroup>
+    <ProjectReference Include="..\LightNotes.Application\LightNotes.Application.csproj" />
+    <ProjectReference Include="..\LightNotes.Infrastructure\LightNotes.Infrastructure.csproj" />
+  </ItemGroup>
+</Project>

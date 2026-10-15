@@ -1,2 +1,8 @@
 <Solution>
+  <Folder Name="/src/">
+    <Project Path="src/LightNotes.Api/LightNotes.Api.csproj" />
+    <Project Path="src/LightNotes.Application/LightNotes.Application.csproj" />
+    <Project Path="src/LightNotes.Domain/LightNotes.Domain.csproj" />
+    <Project Path="src/LightNotes.Infrastructure/LightNotes.Infrastructure.csproj" />
+  </Folder>
 </Solution>
