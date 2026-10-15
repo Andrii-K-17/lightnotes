@@ -10,5 +10,5 @@ dist/
 
 .env
 *.log
-.vscode/*
+.vscode
 !.vscode/extensions.json
