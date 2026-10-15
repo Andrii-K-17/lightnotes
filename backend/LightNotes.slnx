@@ -7,6 +7,7 @@
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/LightNotes.Api.IntegrationTests/LightNotes.Api.IntegrationTests.csproj" />
+    <Project Path="tests/LightNotes.Architecture.Tests/LightNotes.Architecture.Tests.csproj" />
     <Project Path="tests/LightNotes.Domain.Tests/LightNotes.Domain.Tests.csproj" />
   </Folder>
 </Solution>
