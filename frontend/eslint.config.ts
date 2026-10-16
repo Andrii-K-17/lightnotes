@@ -3,6 +3,8 @@ import { defineConfigWithVueTs, vueTsConfigs } from '@vue/eslint-config-typescri
 import pluginVue from 'eslint-plugin-vue'
 import pluginVitest from '@vitest/eslint-plugin'
 import pluginOxlint from 'eslint-plugin-oxlint'
+import type { ESLint } from 'eslint'
+import pluginVueI18n from '@intlify/eslint-plugin-vue-i18n'
 
 // To allow more languages other than `ts` in `.vue` files, uncomment the following lines:
 // import { configureVueProject } from '@vue/eslint-config-typescript'
@@ -23,6 +25,18 @@ export default defineConfigWithVueTs(
   {
     ...pluginVitest.configs.recommended,
     files: ['src/**/__tests__/*'],
+  },
+
+  {
+    name: 'app/i18n',
+    files: ['src/**/*.vue'],
+    plugins: {
+      // Cast: plugin typings clash with ESLint's defineConfig (intlify#669).
+      '@intlify/vue-i18n': pluginVueI18n as unknown as ESLint.Plugin,
+    },
+    rules: {
+      '@intlify/vue-i18n/no-raw-text': 'error',
+    },
   },
 
   ...pluginOxlint.buildFromOxlintConfigFile('.oxlintrc.json'),

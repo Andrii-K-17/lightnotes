@@ -4,6 +4,6 @@ import { Button } from '@/components/ui/button'
 
 <template>
   <div class="p-4">
-    <Button>LightNotes</Button>
+    <Button>{{ $t('app.name') }}</Button>
   </div>
 </template>
