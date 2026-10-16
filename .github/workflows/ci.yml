@@ -38,7 +38,7 @@ jobs:
         node: [24, 26]
     steps:
       - uses: actions/checkout@v7
-      - uses: pnpm/setup@v1
+      - uses: pnpm/setup@v3
         with:
           version: 12
           install: false
