@@ -18,4 +18,10 @@ public static class DomainErrorCodes
     public const string NoteContentTooLarge = "note.content_too_large";
     public const string NoteTooManyTags = "note.too_many_tags";
     public const string NoteInvalidReference = "note.invalid_reference";
+
+    public const string AttachmentTypeNotAllowed = "attachment.type_not_allowed";
+    public const string AttachmentSizeInvalid = "attachment.size_invalid";
+    public const string AttachmentTooLarge = "attachment.too_large";
+    public const string AttachmentHashInvalid = "attachment.hash_invalid";
+    public const string AttachmentStorageKeyInvalid = "attachment.storage_key_invalid";
 }
