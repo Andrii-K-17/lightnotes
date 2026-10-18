@@ -12,4 +12,10 @@ public static class DomainErrorCodes
 
     public const string TagNameRequired = "tag.name_required";
     public const string TagNameTooLong = "tag.name_too_long";
+
+    public const string NoteTitleTooLong = "note.title_too_long";
+    public const string NoteContentInvalid = "note.content_invalid";
+    public const string NoteContentTooLarge = "note.content_too_large";
+    public const string NoteTooManyTags = "note.too_many_tags";
+    public const string NoteInvalidReference = "note.invalid_reference";
 }
