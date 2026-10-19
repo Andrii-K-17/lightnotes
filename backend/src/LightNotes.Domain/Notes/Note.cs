@@ -32,7 +32,7 @@ public sealed class Note : SyncEntity
 
     private Note(Guid id, Guid userId, DateTimeOffset createdAt) : base(id, userId, createdAt)
     {
-        EditedAt = createdAt;
+        EditedAt = CreatedAt;
     }
 
     public static Note Create(Guid id, Guid userId, DateTimeOffset createdAt) => new(id, userId, createdAt);
@@ -56,7 +56,7 @@ public sealed class Note : SyncEntity
         Title = title;
         Content = content;
         ContentText = contentText;
-        EditedAt = editedAt;
+        EditedAt = editedAt.ToUniversalTime();
     }
 
     public void MoveTo(Guid? folderId)

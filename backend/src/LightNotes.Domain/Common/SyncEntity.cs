@@ -38,15 +38,15 @@ public abstract class SyncEntity
 
         Id = id;
         UserId = userId;
-        CreatedAt = createdAt;
-        UpdatedAt = createdAt;
+        CreatedAt = createdAt.ToUniversalTime();
+        UpdatedAt = CreatedAt;
     }
 
     public void MarkChanged(long serverSeq, DateTimeOffset now)
     {
         Version++;
         ServerSeq = serverSeq;
-        UpdatedAt = now;
+        UpdatedAt = now.ToUniversalTime();
     }
 
     public void Delete(DateTimeOffset now)
@@ -56,7 +56,7 @@ public abstract class SyncEntity
             return;
         }
 
-        DeletedAt ??= now;
+        DeletedAt ??= now.ToUniversalTime();
     }
 
     public void Restore()
@@ -72,8 +72,8 @@ public abstract class SyncEntity
             return;
         }
 
-        DeletedAt ??= now;
-        PurgedAt = now;
+        DeletedAt ??= now.ToUniversalTime();
+        PurgedAt = now.ToUniversalTime();
         ClearContent();
     }
 

@@ -180,4 +180,16 @@ public class NoteTests
         AssertFails(DomainErrorCodes.EntityPurged, () => note.Edit("", ValidContent, "", Now));
         AssertFails(DomainErrorCodes.EntityPurged, () => note.SetPinned(true));
     }
+
+    [Fact]
+    public void EditedAt_is_normalized_to_utc()
+    {
+        var local = new DateTimeOffset(2026, 10, 17, 15, 0, 0, TimeSpan.FromHours(3));
+        var note = NewNote();
+
+        note.Edit("", ValidContent, "", local);
+
+        Assert.Equal(TimeSpan.Zero, note.EditedAt.Offset);
+        Assert.Equal(local, note.EditedAt);
+    }
 }

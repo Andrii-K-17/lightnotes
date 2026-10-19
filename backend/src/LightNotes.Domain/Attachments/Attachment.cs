@@ -82,7 +82,7 @@ public sealed class Attachment
             SizeBytes = sizeBytes,
             StorageKey = storageKey,
             Sha256 = sha256.ToLowerInvariant(),
-            CreatedAt = createdAt,
+            CreatedAt = createdAt.ToUniversalTime(),
         };
     }
 }

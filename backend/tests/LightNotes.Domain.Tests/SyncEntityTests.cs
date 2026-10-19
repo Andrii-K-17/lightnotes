@@ -96,4 +96,19 @@ public class SyncEntityTests
         folder.Delete(Now.AddDays(1));
         Assert.Equal(Now, folder.DeletedAt);
     }
+
+    [Fact]
+    public void Timestamps_are_normalized_to_utc()
+    {
+        var local = new DateTimeOffset(2026, 10, 10, 15, 0, 0, TimeSpan.FromHours(3));
+
+        var folder = Folder.Create(NewId(), OwnerId, "Work", "a0", local);
+        folder.MarkChanged(1, local);
+        folder.Delete(local);
+
+        Assert.Equal(TimeSpan.Zero, folder.CreatedAt.Offset);
+        Assert.Equal(TimeSpan.Zero, folder.UpdatedAt.Offset);
+        Assert.Equal(TimeSpan.Zero, folder.DeletedAt!.Value.Offset);
+        Assert.Equal(local, folder.CreatedAt);
+    }
 }
