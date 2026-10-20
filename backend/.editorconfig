@@ -1,9 +1,0 @@
-[*.cs]
-csharp_style_namespace_declarations = file_scoped:warning
-csharp_using_directive_placement = outside_namespace:warning
-dotnet_sort_system_directives_first = true
-csharp_style_var_for_built_in_types = true:suggestion
-csharp_style_var_when_type_is_apparent = true:suggestion
-
-[**/Migrations/**.cs]
-generated_code = true

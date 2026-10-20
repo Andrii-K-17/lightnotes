@@ -40,7 +40,8 @@ public sealed class Attachment
         long sizeBytes,
         string storageKey,
         string sha256,
-        DateTimeOffset createdAt)
+        DateTimeOffset createdAt
+    )
     {
         Guard.ClientId(id);
         Guard.ClientId(noteId);
@@ -50,7 +51,10 @@ public sealed class Attachment
 
         if (!AllowedContentTypes.Contains(type))
         {
-            throw new DomainException(DomainErrorCodes.AttachmentTypeNotAllowed, "Content type is not allowed.");
+            throw new DomainException(
+                DomainErrorCodes.AttachmentTypeNotAllowed,
+                "Content type is not allowed."
+            );
         }
 
         if (sizeBytes <= 0)
@@ -60,17 +64,26 @@ public sealed class Attachment
 
         if (sizeBytes > MaxSizeBytes)
         {
-            throw new DomainException(DomainErrorCodes.AttachmentTooLarge, $"File is larger than {MaxSizeBytes} bytes.");
+            throw new DomainException(
+                DomainErrorCodes.AttachmentTooLarge,
+                $"File is larger than {MaxSizeBytes} bytes."
+            );
         }
 
         if (string.IsNullOrWhiteSpace(storageKey) || storageKey.Length > MaxStorageKeyLength)
         {
-            throw new DomainException(DomainErrorCodes.AttachmentStorageKeyInvalid, "Storage key is invalid.");
+            throw new DomainException(
+                DomainErrorCodes.AttachmentStorageKeyInvalid,
+                "Storage key is invalid."
+            );
         }
 
         if (sha256.Length != Sha256HexLength || !sha256.All(char.IsAsciiHexDigit))
         {
-            throw new DomainException(DomainErrorCodes.AttachmentHashInvalid, "SHA-256 must be 64 hex characters.");
+            throw new DomainException(
+                DomainErrorCodes.AttachmentHashInvalid,
+                "SHA-256 must be 64 hex characters."
+            );
         }
 
         return new Attachment

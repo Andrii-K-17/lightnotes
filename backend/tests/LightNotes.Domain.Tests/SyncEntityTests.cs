@@ -26,14 +26,20 @@ public class SyncEntityTests
     {
         foreach (var id in new[] { Guid.Empty, Guid.NewGuid() })
         {
-            AssertFails(DomainErrorCodes.InvalidId, () => Folder.Create(id, OwnerId, "Work", "a0", Now));
+            AssertFails(
+                DomainErrorCodes.InvalidId,
+                () => Folder.Create(id, OwnerId, "Work", "a0", Now)
+            );
         }
     }
 
     [Fact]
     public void Create_rejects_empty_owner()
     {
-        AssertFails(DomainErrorCodes.InvalidId, () => Folder.Create(NewId(), Guid.Empty, "Work", "a0", Now));
+        AssertFails(
+            DomainErrorCodes.InvalidId,
+            () => Folder.Create(NewId(), Guid.Empty, "Work", "a0", Now)
+        );
     }
 
     [Fact]

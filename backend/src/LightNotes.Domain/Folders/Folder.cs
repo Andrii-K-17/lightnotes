@@ -15,9 +15,16 @@ public sealed class Folder : SyncEntity
 
     private Folder() { }
 
-    private Folder(Guid id, Guid userId, DateTimeOffset createdAt) : base(id, userId, createdAt) { }
+    private Folder(Guid id, Guid userId, DateTimeOffset createdAt)
+        : base(id, userId, createdAt) { }
 
-    public static Folder Create(Guid id, Guid userId, string name, string position, DateTimeOffset createdAt)
+    public static Folder Create(
+        Guid id,
+        Guid userId,
+        string name,
+        string position,
+        DateTimeOffset createdAt
+    )
     {
         var folder = new Folder(id, userId, createdAt);
         folder.Rename(name);
@@ -28,7 +35,12 @@ public sealed class Folder : SyncEntity
     public void Rename(string name)
     {
         EnsureNotPurged();
-        Name = Guard.Name(name, MaxNameLength, DomainErrorCodes.FolderNameRequired, DomainErrorCodes.FolderNameTooLong);
+        Name = Guard.Name(
+            name,
+            MaxNameLength,
+            DomainErrorCodes.FolderNameRequired,
+            DomainErrorCodes.FolderNameTooLong
+        );
     }
 
     public void Reorder(string position)
@@ -37,7 +49,10 @@ public sealed class Folder : SyncEntity
 
         if (string.IsNullOrWhiteSpace(position) || position.Length > MaxPositionLength)
         {
-            throw new DomainException(DomainErrorCodes.FolderPositionInvalid, "Position is invalid.");
+            throw new DomainException(
+                DomainErrorCodes.FolderPositionInvalid,
+                "Position is invalid."
+            );
         }
 
         Position = position;

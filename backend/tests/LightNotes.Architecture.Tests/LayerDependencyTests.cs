@@ -13,15 +13,18 @@ public class LayerDependencyTests
 
     [Fact]
     public void Domain_depends_on_nothing() =>
-        AssertNoDependencies(Domain,
-            Application, Infrastructure, Api,
-            "Microsoft.EntityFrameworkCore", "Microsoft.AspNetCore");
+        AssertNoDependencies(
+            Domain,
+            Application,
+            Infrastructure,
+            Api,
+            "Microsoft.EntityFrameworkCore",
+            "Microsoft.AspNetCore"
+        );
 
     [Fact]
     public void Application_does_not_depend_on_outer_layers() =>
-        AssertNoDependencies(Application,
-            Infrastructure, Api,
-            "Microsoft.AspNetCore", "Npgsql");
+        AssertNoDependencies(Application, Infrastructure, Api, "Microsoft.AspNetCore", "Npgsql");
 
     [Fact]
     public void Infrastructure_does_not_depend_on_Api() =>
@@ -29,7 +32,8 @@ public class LayerDependencyTests
 
     private static void AssertNoDependencies(string assemblyName, params string[] forbidden)
     {
-        var result = Types.InAssembly(Assembly.Load(assemblyName))
+        var result = Types
+            .InAssembly(Assembly.Load(assemblyName))
             .ShouldNot()
             .HaveDependencyOnAny(forbidden)
             .GetResult();

@@ -18,7 +18,10 @@ public class TagTests
     [Fact]
     public void Name_is_required()
     {
-        AssertFails(DomainErrorCodes.TagNameRequired, () => Tag.Create(NewId(), OwnerId, "  ", Now));
+        AssertFails(
+            DomainErrorCodes.TagNameRequired,
+            () => Tag.Create(NewId(), OwnerId, "  ", Now)
+        );
     }
 
     [Fact]
@@ -26,6 +29,9 @@ public class TagTests
     {
         var tag = Tag.Create(NewId(), OwnerId, new string('x', Tag.MaxNameLength), Now);
 
-        AssertFails(DomainErrorCodes.TagNameTooLong, () => tag.Rename(new string('x', Tag.MaxNameLength + 1)));
+        AssertFails(
+            DomainErrorCodes.TagNameTooLong,
+            () => tag.Rename(new string('x', Tag.MaxNameLength + 1))
+        );
     }
 }

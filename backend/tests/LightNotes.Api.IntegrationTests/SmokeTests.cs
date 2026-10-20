@@ -9,7 +9,9 @@ public class SmokeTests(WebApplicationFactory<Program> factory)
     [Fact]
     public async Task Root_returns_200()
     {
-        var response = await factory.CreateClient().GetAsync("/", TestContext.Current.CancellationToken);
+        var response = await factory
+            .CreateClient()
+            .GetAsync("/", TestContext.Current.CancellationToken);
 
         Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
     }

@@ -30,12 +30,14 @@ public sealed class Note : SyncEntity
 
     private Note() { }
 
-    private Note(Guid id, Guid userId, DateTimeOffset createdAt) : base(id, userId, createdAt)
+    private Note(Guid id, Guid userId, DateTimeOffset createdAt)
+        : base(id, userId, createdAt)
     {
         EditedAt = CreatedAt;
     }
 
-    public static Note Create(Guid id, Guid userId, DateTimeOffset createdAt) => new(id, userId, createdAt);
+    public static Note Create(Guid id, Guid userId, DateTimeOffset createdAt) =>
+        new(id, userId, createdAt);
 
     public void Edit(string title, string content, string contentText, DateTimeOffset editedAt)
     {
@@ -43,14 +45,20 @@ public sealed class Note : SyncEntity
 
         if (title.Length > MaxTitleLength)
         {
-            throw new DomainException(DomainErrorCodes.NoteTitleTooLong, $"Title is longer than {MaxTitleLength} characters.");
+            throw new DomainException(
+                DomainErrorCodes.NoteTitleTooLong,
+                $"Title is longer than {MaxTitleLength} characters."
+            );
         }
 
         ValidateContent(content);
 
         if (Encoding.UTF8.GetByteCount(contentText) > MaxContentBytes)
         {
-            throw new DomainException(DomainErrorCodes.NoteContentTooLarge, "Content text is too large.");
+            throw new DomainException(
+                DomainErrorCodes.NoteContentTooLarge,
+                "Content text is too large."
+            );
         }
 
         Title = title;
@@ -80,7 +88,10 @@ public sealed class Note : SyncEntity
 
         if (distinct.Count > MaxTags)
         {
-            throw new DomainException(DomainErrorCodes.NoteTooManyTags, $"A note can have at most {MaxTags} tags.");
+            throw new DomainException(
+                DomainErrorCodes.NoteTooManyTags,
+                $"A note can have at most {MaxTags} tags."
+            );
         }
 
         foreach (var tagId in distinct)
@@ -105,7 +116,10 @@ public sealed class Note : SyncEntity
     {
         if (id == Guid.Empty)
         {
-            throw new DomainException(DomainErrorCodes.NoteInvalidReference, "Reference id is invalid.");
+            throw new DomainException(
+                DomainErrorCodes.NoteInvalidReference,
+                "Reference id is invalid."
+            );
         }
     }
 
@@ -113,7 +127,10 @@ public sealed class Note : SyncEntity
     {
         if (Encoding.UTF8.GetByteCount(content) > MaxContentBytes)
         {
-            throw new DomainException(DomainErrorCodes.NoteContentTooLarge, "Content is too large.");
+            throw new DomainException(
+                DomainErrorCodes.NoteContentTooLarge,
+                "Content is too large."
+            );
         }
 
         try
@@ -122,12 +139,18 @@ public sealed class Note : SyncEntity
 
             if (document.RootElement.ValueKind != JsonValueKind.Object)
             {
-                throw new DomainException(DomainErrorCodes.NoteContentInvalid, "Content must be a JSON object.");
+                throw new DomainException(
+                    DomainErrorCodes.NoteContentInvalid,
+                    "Content must be a JSON object."
+                );
             }
         }
         catch (JsonException)
         {
-            throw new DomainException(DomainErrorCodes.NoteContentInvalid, "Content is not valid JSON.");
+            throw new DomainException(
+                DomainErrorCodes.NoteContentInvalid,
+                "Content is not valid JSON."
+            );
         }
     }
 }

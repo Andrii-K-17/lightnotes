@@ -21,16 +21,28 @@ public class FolderTests
     [InlineData("   ")]
     public void Name_is_required(string name)
     {
-        AssertFails(DomainErrorCodes.FolderNameRequired, () => Folder.Create(NewId(), OwnerId, name, "a0", Now));
+        AssertFails(
+            DomainErrorCodes.FolderNameRequired,
+            () => Folder.Create(NewId(), OwnerId, name, "a0", Now)
+        );
     }
 
     [Fact]
     public void Name_is_limited_to_60_characters()
     {
-        var folder = Folder.Create(NewId(), OwnerId, new string('x', Folder.MaxNameLength), "a0", Now);
+        var folder = Folder.Create(
+            NewId(),
+            OwnerId,
+            new string('x', Folder.MaxNameLength),
+            "a0",
+            Now
+        );
         Assert.Equal(Folder.MaxNameLength, folder.Name.Length);
 
-        AssertFails(DomainErrorCodes.FolderNameTooLong, () => folder.Rename(new string('x', Folder.MaxNameLength + 1)));
+        AssertFails(
+            DomainErrorCodes.FolderNameTooLong,
+            () => folder.Rename(new string('x', Folder.MaxNameLength + 1))
+        );
     }
 
     [Theory]
@@ -38,7 +50,10 @@ public class FolderTests
     [InlineData("  ")]
     public void Position_is_required(string position)
     {
-        AssertFails(DomainErrorCodes.FolderPositionInvalid, () => Folder.Create(NewId(), OwnerId, "Work", position, Now));
+        AssertFails(
+            DomainErrorCodes.FolderPositionInvalid,
+            () => Folder.Create(NewId(), OwnerId, "Work", position, Now)
+        );
     }
 
     [Fact]
@@ -46,6 +61,9 @@ public class FolderTests
     {
         var folder = Folder.Create(NewId(), OwnerId, "Work", "a0", Now);
 
-        AssertFails(DomainErrorCodes.FolderPositionInvalid, () => folder.Reorder(new string('a', Folder.MaxPositionLength + 1)));
+        AssertFails(
+            DomainErrorCodes.FolderPositionInvalid,
+            () => folder.Reorder(new string('a', Folder.MaxPositionLength + 1))
+        );
     }
 }

@@ -11,7 +11,8 @@ public sealed class Tag : SyncEntity
 
     private Tag() { }
 
-    private Tag(Guid id, Guid userId, DateTimeOffset createdAt) : base(id, userId, createdAt) { }
+    private Tag(Guid id, Guid userId, DateTimeOffset createdAt)
+        : base(id, userId, createdAt) { }
 
     public static Tag Create(Guid id, Guid userId, string name, DateTimeOffset createdAt)
     {
@@ -23,7 +24,12 @@ public sealed class Tag : SyncEntity
     public void Rename(string name)
     {
         EnsureNotPurged();
-        Name = Guard.Name(name, MaxNameLength, DomainErrorCodes.TagNameRequired, DomainErrorCodes.TagNameTooLong);
+        Name = Guard.Name(
+            name,
+            MaxNameLength,
+            DomainErrorCodes.TagNameRequired,
+            DomainErrorCodes.TagNameTooLong
+        );
     }
 
     protected override void ClearContent() => Name = "";

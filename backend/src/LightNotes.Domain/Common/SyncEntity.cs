@@ -83,7 +83,10 @@ public abstract class SyncEntity
     {
         if (IsPurged)
         {
-            throw new DomainException(DomainErrorCodes.EntityPurged, "The entity was permanently deleted.");
+            throw new DomainException(
+                DomainErrorCodes.EntityPurged,
+                "The entity was permanently deleted."
+            );
         }
     }
 }

@@ -13,8 +13,18 @@ public class AttachmentTests
         string contentType = "image/png",
         long size = 1024,
         string storageKey = "key",
-        string? sha256 = null) =>
-        Attachment.Create(NewId(), OwnerId, NewId(), contentType, size, storageKey, sha256 ?? Hash, Now);
+        string? sha256 = null
+    ) =>
+        Attachment.Create(
+            NewId(),
+            OwnerId,
+            NewId(),
+            contentType,
+            size,
+            storageKey,
+            sha256 ?? Hash,
+            Now
+        );
 
     [Fact]
     public void Create_normalizes_type_and_hash()
@@ -48,7 +58,10 @@ public class AttachmentTests
     {
         Assert.Equal(Attachment.MaxSizeBytes, Create(size: Attachment.MaxSizeBytes).SizeBytes);
 
-        AssertFails(DomainErrorCodes.AttachmentTooLarge, () => Create(size: Attachment.MaxSizeBytes + 1));
+        AssertFails(
+            DomainErrorCodes.AttachmentTooLarge,
+            () => Create(size: Attachment.MaxSizeBytes + 1)
+        );
     }
 
     [Theory]
@@ -69,9 +82,33 @@ public class AttachmentTests
     [Fact]
     public void Ids_must_be_uuid_v7()
     {
-        AssertFails(DomainErrorCodes.InvalidId,
-            () => Attachment.Create(Guid.NewGuid(), OwnerId, NewId(), "image/png", 1, "key", Hash, Now));
-        AssertFails(DomainErrorCodes.InvalidId,
-            () => Attachment.Create(NewId(), OwnerId, Guid.NewGuid(), "image/png", 1, "key", Hash, Now));
+        AssertFails(
+            DomainErrorCodes.InvalidId,
+            () =>
+                Attachment.Create(
+                    Guid.NewGuid(),
+                    OwnerId,
+                    NewId(),
+                    "image/png",
+                    1,
+                    "key",
+                    Hash,
+                    Now
+                )
+        );
+        AssertFails(
+            DomainErrorCodes.InvalidId,
+            () =>
+                Attachment.Create(
+                    NewId(),
+                    OwnerId,
+                    Guid.NewGuid(),
+                    "image/png",
+                    1,
+                    "key",
+                    Hash,
+                    Now
+                )
+        );
     }
 }

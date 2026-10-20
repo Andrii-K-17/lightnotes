@@ -46,8 +46,10 @@ public class NoteTests
         note.Edit("", ValidContent, "", Now);
         note.Edit(new string('x', Note.MaxTitleLength), ValidContent, "", Now);
 
-        AssertFails(DomainErrorCodes.NoteTitleTooLong,
-            () => note.Edit(new string('x', Note.MaxTitleLength + 1), ValidContent, "", Now));
+        AssertFails(
+            DomainErrorCodes.NoteTitleTooLong,
+            () => note.Edit(new string('x', Note.MaxTitleLength + 1), ValidContent, "", Now)
+        );
     }
 
     [Theory]
@@ -57,7 +59,10 @@ public class NoteTests
     [InlineData("\"text\"")]
     public void Content_must_be_a_json_object(string content)
     {
-        AssertFails(DomainErrorCodes.NoteContentInvalid, () => NewNote().Edit("", content, "", Now));
+        AssertFails(
+            DomainErrorCodes.NoteContentInvalid,
+            () => NewNote().Edit("", content, "", Now)
+        );
     }
 
     [Fact]
@@ -65,7 +70,10 @@ public class NoteTests
     {
         var tooLarge = "{\"t\":\"" + new string('x', Note.MaxContentBytes) + "\"}";
 
-        AssertFails(DomainErrorCodes.NoteContentTooLarge, () => NewNote().Edit("", tooLarge, "", Now));
+        AssertFails(
+            DomainErrorCodes.NoteContentTooLarge,
+            () => NewNote().Edit("", tooLarge, "", Now)
+        );
     }
 
     [Fact]
@@ -73,7 +81,10 @@ public class NoteTests
     {
         var tooLarge = new string('x', Note.MaxContentBytes + 1);
 
-        AssertFails(DomainErrorCodes.NoteContentTooLarge, () => NewNote().Edit("", ValidContent, tooLarge, Now));
+        AssertFails(
+            DomainErrorCodes.NoteContentTooLarge,
+            () => NewNote().Edit("", ValidContent, tooLarge, Now)
+        );
     }
 
     [Fact]
@@ -82,7 +93,9 @@ public class NoteTests
         var note = NewNote();
         note.Edit("Before", ValidContent, "before", Now);
 
-        Assert.Throws<DomainException>(() => note.Edit("After", "broken", "after", Now.AddMinutes(1)));
+        Assert.Throws<DomainException>(() =>
+            note.Edit("After", "broken", "after", Now.AddMinutes(1))
+        );
 
         Assert.Equal("Before", note.Title);
         Assert.Equal(Now, note.EditedAt);
@@ -126,8 +139,10 @@ public class NoteTests
         note.SetTags(Enumerable.Range(0, Note.MaxTags).Select(_ => NewId()));
         Assert.Equal(Note.MaxTags, note.TagIds.Count);
 
-        AssertFails(DomainErrorCodes.NoteTooManyTags,
-            () => note.SetTags(Enumerable.Range(0, Note.MaxTags + 1).Select(_ => NewId())));
+        AssertFails(
+            DomainErrorCodes.NoteTooManyTags,
+            () => note.SetTags(Enumerable.Range(0, Note.MaxTags + 1).Select(_ => NewId()))
+        );
     }
 
     [Fact]
