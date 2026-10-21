@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using LightNotes.Api.Common;
 using LightNotes.Application.Abstractions;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 
@@ -15,6 +16,23 @@ public static class DependencyInjection
             options.SerializerOptions.Converters.Add(new JsonStringEnumConverter())
         );
 
+        services.AddProblemDetails(options =>
+            options.CustomizeProblemDetails = context =>
+            {
+                var problem = context.ProblemDetails;
+
+                if (!problem.Extensions.ContainsKey("code"))
+                {
+                    problem.Extensions["code"] =
+                        problem is HttpValidationProblemDetails
+                            ? "validation.failed"
+                            : $"http.{problem.Status}";
+                }
+            }
+        );
+        services.AddExceptionHandler<GlobalExceptionHandler>();
+        services.AddValidation();
+
         return services;
     }
 
@@ -27,6 +45,14 @@ public static class DependencyInjection
                 new HealthCheckOptions { Predicate = check => check.Tags.Contains("ready") }
             )
             .ExcludeFromDescription();
+
+        return app;
+    }
+
+    public static WebApplication UseApi(this WebApplication app)
+    {
+        app.UseExceptionHandler();
+        app.UseStatusCodePages();
 
         return app;
     }

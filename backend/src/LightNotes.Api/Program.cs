@@ -8,6 +8,7 @@ builder.Services.AddApplication().AddInfrastructure().AddApi();
 
 var app = builder.Build();
 
+app.UseApi();
 app.MapApi();
 
 app.Run();
