@@ -1,7 +1,14 @@
+using LightNotes.Api;
+using LightNotes.Application;
+using LightNotes.Infrastructure;
+
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddApplication().AddInfrastructure().AddApi();
+
 var app = builder.Build();
 
-app.MapGet("/", () => "LightNotes API");
+app.MapApi();
 
 app.Run();
 
