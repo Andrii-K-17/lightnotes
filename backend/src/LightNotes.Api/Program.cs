@@ -8,6 +8,11 @@ builder.Services.AddApplication().AddInfrastructure().AddApi();
 
 var app = builder.Build();
 
+if (app.Environment.IsDevelopment())
+{
+    await app.Services.MigrateDatabaseAsync();
+}
+
 app.UseApi();
 app.MapApi();
 

@@ -29,4 +29,18 @@ public static class DependencyInjection
 
         return services;
     }
+
+    /// <summary>
+    /// Asynchronously applies any pending database migrations using a temporary service scope.
+    /// </summary>
+    public static async Task MigrateDatabaseAsync(
+        this IServiceProvider services,
+        CancellationToken cancellationToken = default
+    )
+    {
+        await using var scope = services.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+        await db.Database.MigrateAsync(cancellationToken);
+    }
 }
