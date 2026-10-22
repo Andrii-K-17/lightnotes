@@ -3,4 +3,8 @@
     <ProjectReference Include="..\LightNotes.Application\LightNotes.Application.csproj" />
     <ProjectReference Include="..\LightNotes.Infrastructure\LightNotes.Infrastructure.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+    <PackageReference Include="Scalar.AspNetCore" />
+  </ItemGroup>
 </Project>

@@ -2,6 +2,7 @@ using System.Text.Json.Serialization;
 using LightNotes.Api.Common;
 using LightNotes.Application.Abstractions;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Scalar.AspNetCore;
 
 namespace LightNotes.Api;
 
@@ -32,6 +33,7 @@ public static class DependencyInjection
         );
         services.AddExceptionHandler<GlobalExceptionHandler>();
         services.AddValidation();
+        services.AddOpenApi();
 
         return services;
     }
@@ -45,6 +47,13 @@ public static class DependencyInjection
                 new HealthCheckOptions { Predicate = check => check.Tags.Contains("ready") }
             )
             .ExcludeFromDescription();
+
+        if (app.Environment.IsDevelopment())
+        {
+            app.MapOpenApi();
+            app.MapScalarApiReference();
+            app.MapGet("/", () => Results.Redirect("/scalar")).ExcludeFromDescription();
+        }
 
         return app;
     }
