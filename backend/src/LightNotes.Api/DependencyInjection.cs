@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using LightNotes.Api.Common;
+using LightNotes.Api.Endpoints;
 using LightNotes.Application.Abstractions;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Scalar.AspNetCore;
@@ -47,6 +48,9 @@ public static class DependencyInjection
                 new HealthCheckOptions { Predicate = check => check.Tags.Contains("ready") }
             )
             .ExcludeFromDescription();
+
+        var v1 = app.MapGroup("/api/v1");
+        v1.MapAuthEndpoints();
 
         if (app.Environment.IsDevelopment())
         {
