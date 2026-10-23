@@ -14,6 +14,7 @@ public class SmokeTests
         {
             builder.UseEnvironment("Testing");
             builder.UseSetting("ConnectionStrings:Default", "Host=localhost;Database=unused");
+            builder.UseSetting("Jwt:SigningKey", new string('k', 32));
         });
         using var client = factory.CreateClient();
 

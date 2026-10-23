@@ -1,8 +1,13 @@
+using System.Text;
 using System.Text.Json.Serialization;
 using LightNotes.Api.Common;
 using LightNotes.Api.Endpoints;
 using LightNotes.Application.Abstractions;
+using LightNotes.Application.Auth;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 
 namespace LightNotes.Api;
@@ -36,6 +41,30 @@ public static class DependencyInjection
         services.AddValidation();
         services.AddOpenApi();
 
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();
+        services.AddAuthorization();
+
+        services
+            .AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme)
+            .Configure<IOptions<JwtOptions>>(
+                (bearer, jwtOptions) =>
+                {
+                    var jwt = jwtOptions.Value;
+
+                    bearer.MapInboundClaims = false;
+                    bearer.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidIssuer = jwt.Issuer,
+                        ValidAudience = jwt.Audience,
+                        IssuerSigningKey = new SymmetricSecurityKey(
+                            Encoding.UTF8.GetBytes(jwt.SigningKey)
+                        ),
+                        ValidAlgorithms = [SecurityAlgorithms.HmacSha256],
+                        ClockSkew = TimeSpan.FromSeconds(30),
+                    };
+                }
+            );
+
         return services;
     }
 
@@ -66,6 +95,8 @@ public static class DependencyInjection
     {
         app.UseExceptionHandler();
         app.UseStatusCodePages();
+        app.UseAuthentication();
+        app.UseAuthorization();
 
         return app;
     }

@@ -51,6 +51,14 @@ public static class DependencyInjection
 
         services.AddScoped<IAuthService, AuthService>();
 
+        services
+            .AddOptions<JwtOptions>()
+            .BindConfiguration(JwtOptions.SectionName)
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        services.AddSingleton<TokenService>();
+
         return services;
     }
 
