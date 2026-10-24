@@ -4,6 +4,8 @@ using LightNotes.Api.Common;
 using LightNotes.Api.Endpoints;
 using LightNotes.Application.Abstractions;
 using LightNotes.Application.Auth;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Options;
@@ -14,7 +16,10 @@ namespace LightNotes.Api;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddApi(this IServiceCollection services)
+    public static IServiceCollection AddApi(
+        this IServiceCollection services,
+        IConfiguration configuration
+    )
     {
         services.AddHttpContextAccessor();
         services.AddScoped<ICurrentUser, CurrentUser>();
@@ -41,7 +46,42 @@ public static class DependencyInjection
         services.AddValidation();
         services.AddOpenApi();
 
-        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();
+        var authentication = services
+            .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer()
+            .AddCookie(
+                ExternalCookie.Scheme,
+                options =>
+                {
+                    options.Cookie.Name = "ln_external";
+                    options.Cookie.HttpOnly = true;
+                    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                    options.Cookie.SameSite = SameSiteMode.Lax;
+                    options.ExpireTimeSpan = TimeSpan.FromMinutes(7);
+                }
+            );
+
+        var google = configuration.GetSection("Authentication:Google");
+
+        if (
+            !string.IsNullOrEmpty(google["ClientId"])
+            && !string.IsNullOrEmpty(google["ClientSecret"])
+        )
+        {
+            authentication.AddGoogle(
+                GoogleDefaults.AuthenticationScheme,
+                options =>
+                {
+                    options.SignInScheme = ExternalCookie.Scheme;
+                    options.ClientId = google["ClientId"]!;
+                    options.ClientSecret = google["ClientSecret"]!;
+                    options.CallbackPath = "/api/v1/auth/google/signin";
+                    options.UsePkce = true;
+                    options.ClaimActions.MapJsonKey("email_verified", "email_verified");
+                }
+            );
+        }
+
         services.AddAuthorization();
 
         services

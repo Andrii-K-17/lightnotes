@@ -8,3 +8,8 @@ public sealed record AuthSession(
 );
 
 public sealed record UserProfile(Guid Id, string Email, bool AiConsent);
+
+/// <summary>
+/// Identity asserted by Google after a successful sign-in.
+/// </summary>
+public sealed record GoogleIdentity(string Subject, string Email, bool EmailVerified);

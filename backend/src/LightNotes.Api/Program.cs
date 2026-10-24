@@ -4,7 +4,7 @@ using LightNotes.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddApplication().AddInfrastructure().AddApi();
+builder.Services.AddApplication().AddInfrastructure().AddApi(builder.Configuration);
 
 var app = builder.Build();
 

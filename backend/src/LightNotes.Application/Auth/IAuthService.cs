@@ -26,4 +26,9 @@ public interface IAuthService
     Task<Result> LogoutAsync(string? refreshToken, CancellationToken cancellationToken);
 
     Task<Result<UserProfile>> GetProfileAsync(CancellationToken cancellationToken);
+
+    Task<Result<AuthSession>> SignInWithGoogleAsync(
+        GoogleIdentity identity,
+        CancellationToken cancellationToken
+    );
 }

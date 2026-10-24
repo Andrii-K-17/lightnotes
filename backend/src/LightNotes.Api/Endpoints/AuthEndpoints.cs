@@ -1,12 +1,17 @@
+using System.Security.Claims;
 using LightNotes.Api.Common;
 using LightNotes.Api.Contracts;
 using LightNotes.Application.Auth;
 using LightNotes.Application.Common;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Google;
 
 namespace LightNotes.Api.Endpoints;
 
 public static class AuthEndpoints
 {
+    private const string SpaCallbackPath = "/auth/callback";
+
     public static IEndpointRouteBuilder MapAuthEndpoints(this IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/auth").WithTags("Auth");
@@ -81,6 +86,70 @@ public static class AuthEndpoints
             .RequireXRequestedWith()
             .Produces(StatusCodes.Status204NoContent);
 
+        group
+            .MapGet(
+                "/google/login",
+                async Task<IResult> (IAuthenticationSchemeProvider schemes) =>
+                {
+                    if (await schemes.GetSchemeAsync(GoogleDefaults.AuthenticationScheme) is null)
+                    {
+                        return Results.Redirect(SpaError("auth.google_not_configured"));
+                    }
+
+                    return TypedResults.Challenge(
+                        new AuthenticationProperties
+                        {
+                            RedirectUri = "/api/v1/auth/google/callback",
+                        },
+                        [GoogleDefaults.AuthenticationScheme]
+                    );
+                }
+            )
+            .ExcludeFromDescription();
+
+        group
+            .MapGet(
+                "/google/callback",
+                async Task<IResult> (IAuthService auth, HttpContext http, CancellationToken ct) =>
+                {
+                    var external = await http.AuthenticateAsync(ExternalCookie.Scheme);
+                    await http.SignOutAsync(ExternalCookie.Scheme);
+
+                    var subject = external.Principal?.FindFirstValue(ClaimTypes.NameIdentifier);
+                    var email = external.Principal?.FindFirstValue(ClaimTypes.Email);
+
+                    if (!external.Succeeded || subject is null || email is null)
+                    {
+                        return Results.Redirect(SpaError("auth.google_failed"));
+                    }
+
+                    var verified = string.Equals(
+                        external.Principal!.FindFirstValue("email_verified"),
+                        "true",
+                        StringComparison.OrdinalIgnoreCase
+                    );
+
+                    var result = await auth.SignInWithGoogleAsync(
+                        new GoogleIdentity(subject, email, verified),
+                        ct
+                    );
+
+                    if (!result.IsSuccess)
+                    {
+                        return Results.Redirect(SpaError(result.Error.Code));
+                    }
+
+                    RefreshCookie.Append(
+                        http.Response,
+                        result.Value.RefreshToken,
+                        result.Value.RefreshTokenExpiresAt
+                    );
+
+                    return Results.Redirect(SpaCallbackPath);
+                }
+            )
+            .ExcludeFromDescription();
+
         return app;
     }
 
@@ -105,4 +174,7 @@ public static class AuthEndpoints
 
         return TypedResults.Ok(new AccessTokenResponse(session.AccessToken, expiresIn));
     }
+
+    private static string SpaError(string code) =>
+        $"{SpaCallbackPath}?error={Uri.EscapeDataString(code)}";
 }

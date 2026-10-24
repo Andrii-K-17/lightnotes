@@ -28,6 +28,8 @@ internal sealed class AuthService(
 
     private readonly JwtOptions _jwt = jwtOptions.Value;
 
+    private const string GoogleProvider = "Google";
+
     public async Task<Result> RegisterAsync(
         string email,
         string password,
@@ -161,6 +163,87 @@ internal sealed class AuthService(
         }
 
         return new UserProfile(user.Id, user.Email!, user.AiConsentAt is not null);
+    }
+
+    public async Task<Result<AuthSession>> SignInWithGoogleAsync(
+        GoogleIdentity identity,
+        CancellationToken cancellationToken
+    )
+    {
+        var user = await userManager.FindByLoginAsync(GoogleProvider, identity.Subject);
+
+        if (user is null)
+        {
+            if (!identity.EmailVerified)
+            {
+                return Error.Forbidden("auth.google_email_unverified");
+            }
+
+            var linked = await LinkOrCreateGoogleUserAsync(identity, cancellationToken);
+
+            if (!linked.IsSuccess)
+            {
+                return linked.Error;
+            }
+
+            user = linked.Value;
+        }
+
+        if (await userManager.IsLockedOutAsync(user))
+        {
+            return Error.RateLimited("auth.locked_out");
+        }
+
+        return await StartSessionAsync(user.Id, Guid.CreateVersion7(), cancellationToken);
+    }
+
+    private async Task<Result<ApplicationUser>> LinkOrCreateGoogleUserAsync(
+        GoogleIdentity identity,
+        CancellationToken cancellationToken
+    )
+    {
+        var failure = Error.Conflict("auth.google_sign_in_failed");
+        var user = await userManager.FindByEmailAsync(identity.Email);
+
+        if (user is null)
+        {
+            user = new ApplicationUser
+            {
+                UserName = identity.Email,
+                Email = identity.Email,
+                EmailConfirmed = true,
+            };
+
+            if (!(await userManager.CreateAsync(user)).Succeeded)
+            {
+                return failure;
+            }
+        }
+        else if (!user.EmailConfirmed)
+        {
+            await userManager.RemovePasswordAsync(user);
+            user.EmailConfirmed = true;
+            await userManager.UpdateAsync(user);
+            await RevokeUserSessionsAsync(user.Id, cancellationToken);
+        }
+
+        var login = new UserLoginInfo(GoogleProvider, identity.Subject, GoogleProvider);
+
+        if (!(await userManager.AddLoginAsync(user, login)).Succeeded)
+        {
+            return failure;
+        }
+
+        return user;
+    }
+
+    private Task<int> RevokeUserSessionsAsync(Guid userId, CancellationToken cancellationToken)
+    {
+        var now = timeProvider.GetUtcNow();
+
+        return db
+            .RefreshTokens.Where(t => t.UserId == userId && t.RevokedAt == null)
+            .ExecuteUpdateAsync(s => s.SetProperty(t => t.RevokedAt, now), cancellationToken);
     }
 
     private async Task<AuthSession> StartSessionAsync(
