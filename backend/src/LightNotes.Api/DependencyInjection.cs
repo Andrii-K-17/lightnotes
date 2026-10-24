@@ -105,6 +105,8 @@ public static class DependencyInjection
                 }
             );
 
+        services.AddApiRateLimiting();
+
         return services;
     }
 
@@ -136,6 +138,7 @@ public static class DependencyInjection
     {
         app.UseExceptionHandler();
         app.UseStatusCodePages();
+        app.UseRateLimiter();
         app.UseAuthentication();
         app.UseAuthorization();
 
