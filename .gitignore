@@ -12,4 +12,3 @@ dist/
 *.log
 .vscode
 !.vscode/extensions.json
-/backend/src/LightNotes.Api/appsettings.json

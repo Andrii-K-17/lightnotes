@@ -80,6 +80,7 @@ public static class DependencyInjection
 
         var v1 = app.MapGroup("/api/v1");
         v1.MapAuthEndpoints();
+        v1.MapMeEndpoints();
 
         if (app.Environment.IsDevelopment())
         {

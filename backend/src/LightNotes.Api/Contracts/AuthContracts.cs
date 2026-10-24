@@ -14,3 +14,14 @@ public sealed record RegisterRequest
     ]
     public string Password { get; init; } = "";
 }
+
+public sealed record LoginRequest
+{
+    [Required, EmailAddress, StringLength(AuthRules.EmailMaxLength)]
+    public string Email { get; init; } = "";
+
+    [Required, StringLength(AuthRules.PasswordMaxLength)]
+    public string Password { get; init; } = "";
+}
+
+public sealed record AccessTokenResponse(string AccessToken, int ExpiresIn);
