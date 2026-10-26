@@ -12,5 +12,5 @@
   "useTabs": false,
   "vueIndentScriptAndStyle": false,
   "singleAttributePerLine": true,
-  "ignorePatterns": ["src/components/ui/**", "pnpm-lock.yaml"]
+  "ignorePatterns": ["src/components/ui/**", "pnpm-lock.yaml", "src/lib/api/schema.d.ts"]
 }
