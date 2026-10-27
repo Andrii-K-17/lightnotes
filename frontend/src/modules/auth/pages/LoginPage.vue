@@ -8,6 +8,7 @@ import { errorMessage } from '@/i18n/errors'
 import AuthCard from '../components/AuthCard.vue'
 import { useAuthForm } from '../composables/useAuthForm'
 import { useSessionStore } from '../stores/session'
+import GoogleSignIn from '../components/GoogleSignIn.vue'
 
 const route = useRoute()
 const session = useSessionStore()
@@ -62,6 +63,8 @@ const error = computed(() => (errorCode.value ? errorMessage(errorCode.value) : 
     </form>
 
     <template #footer>
+      <GoogleSignIn />
+
       <p class="text-sm text-muted-foreground">
         {{ $t('auth.login.noAccount') }}
         <RouterLink

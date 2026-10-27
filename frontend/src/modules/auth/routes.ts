@@ -15,4 +15,10 @@ export const authRoutes: RouteRecordRaw[] = [
     component: () => import('./pages/RegisterPage.vue'),
     meta: guest,
   },
+  {
+    path: '/auth/callback',
+    name: 'auth-callback',
+    component: () => import('./pages/GoogleCallbackPage.vue'),
+    meta: { layout: 'auth', public: true },
+  },
 ]

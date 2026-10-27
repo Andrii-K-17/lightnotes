@@ -41,7 +41,11 @@
       "google_not_configured": "Google sign-in is not available.",
       "google_failed": "Google sign-in failed. Please try again.",
       "google_sign_in_failed": "Google sign-in failed. Please try again.",
-      "google_email_unverified": "Your Google email address is not verified."
+      "google_email_unverified": "Your Google email address is not verified.",
+      "callback": {
+        "title": "Sign-in failed",
+        "back": "Back to sign in"
+      }
     }
   }
 }
