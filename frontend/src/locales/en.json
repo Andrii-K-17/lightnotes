@@ -46,6 +46,18 @@
         "title": "Sign-in failed",
         "back": "Back to sign in"
       }
+    },
+    "settings": {
+      "title": "Settings",
+      "back": "Back to notes",
+      "appearance": "Appearance",
+      "theme": {
+        "auto": "System",
+        "light": "Light",
+        "dark": "Dark"
+      },
+      "account": "Account",
+      "signOut": "Sign out"
     }
   }
 }
