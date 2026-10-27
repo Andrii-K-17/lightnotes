@@ -91,11 +91,16 @@ public static class AuthEndpoints
         group
             .MapGet(
                 "/google/login",
-                async Task<IResult> (IAuthenticationSchemeProvider schemes) =>
+                async Task<IResult> (
+                    IAuthenticationSchemeProvider schemes,
+                    IConfiguration configuration
+                ) =>
                 {
                     if (await schemes.GetSchemeAsync(GoogleDefaults.AuthenticationScheme) is null)
                     {
-                        return Results.Redirect(SpaError("auth.google_not_configured"));
+                        return Results.Redirect(
+                            SpaCallback(configuration, "auth.google_not_configured")
+                        );
                     }
 
                     return TypedResults.Challenge(
@@ -112,7 +117,12 @@ public static class AuthEndpoints
         group
             .MapGet(
                 "/google/callback",
-                async Task<IResult> (IAuthService auth, HttpContext http, CancellationToken ct) =>
+                async Task<IResult> (
+                    IAuthService auth,
+                    HttpContext http,
+                    IConfiguration configuration,
+                    CancellationToken ct
+                ) =>
                 {
                     var external = await http.AuthenticateAsync(ExternalCookie.Scheme);
                     await http.SignOutAsync(ExternalCookie.Scheme);
@@ -122,7 +132,7 @@ public static class AuthEndpoints
 
                     if (!external.Succeeded || subject is null || email is null)
                     {
-                        return Results.Redirect(SpaError("auth.google_failed"));
+                        return Results.Redirect(SpaCallback(configuration, "auth.google_failed"));
                     }
 
                     var verified = string.Equals(
@@ -138,7 +148,7 @@ public static class AuthEndpoints
 
                     if (!result.IsSuccess)
                     {
-                        return Results.Redirect(SpaError(result.Error.Code));
+                        return Results.Redirect(SpaCallback(configuration, result.Error.Code));
                     }
 
                     RefreshCookie.Append(
@@ -147,7 +157,7 @@ public static class AuthEndpoints
                         result.Value.RefreshTokenExpiresAt
                     );
 
-                    return Results.Redirect(SpaCallbackPath);
+                    return Results.Redirect(SpaCallback(configuration));
                 }
             )
             .ExcludeFromDescription();
@@ -177,6 +187,27 @@ public static class AuthEndpoints
         return TypedResults.Ok(new AccessTokenResponse(session.AccessToken, expiresIn));
     }
 
-    private static string SpaError(string code) =>
-        $"{SpaCallbackPath}?error={Uri.EscapeDataString(code)}";
+    private static string SpaCallback(IConfiguration configuration, string? error = null)
+    {
+        var frontendUrl = configuration["Frontend:BaseUrl"];
+
+        if (
+            !Uri.TryCreate(frontendUrl, UriKind.Absolute, out var frontendUri)
+            || (frontendUri.Scheme != Uri.UriSchemeHttp && frontendUri.Scheme != Uri.UriSchemeHttps)
+        )
+        {
+            throw new InvalidOperationException(
+                "Configuration value 'Frontend:BaseUrl' must be an absolute HTTP or HTTPS URL."
+            );
+        }
+
+        var callbackUri = new UriBuilder(frontendUri)
+        {
+            Path = SpaCallbackPath,
+            Query = error is null ? string.Empty : $"error={Uri.EscapeDataString(error)}",
+            Fragment = string.Empty,
+        };
+
+        return callbackUri.Uri.AbsoluteUri;
+    }
 }
