@@ -5,10 +5,12 @@ import './main.css'
 
 import App from '@/app/App.vue'
 import { router } from '@/app/router'
+import { installAuth } from './modules/auth'
 
 const app = createApp(App)
 
 app.use(createPinia())
+installAuth(() => router.replace({ name: 'login' }))
 app.use(router)
 app.use(i18n)
 
