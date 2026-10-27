@@ -1,6 +1,7 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import { i18n } from '@/i18n'
+import '@fontsource-variable/plus-jakarta-sans'
 import './main.css'
 
 import App from '@/app/App.vue'

@@ -37,6 +37,7 @@ export default defineConfig({
         ],
       },
       workbox: {
+        globPatterns: ['**/*.{js,css,html}', '**/*plus-jakarta-sans-variable*.woff2'],
         navigateFallback: 'index.html',
         navigateFallbackDenylist: [/^\/api\//],
       },
