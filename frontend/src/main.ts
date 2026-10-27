@@ -10,7 +10,12 @@ import { installAuth } from './modules/auth'
 const app = createApp(App)
 
 app.use(createPinia())
-installAuth(() => router.replace({ name: 'login' }))
+installAuth(() =>
+  router.replace({
+    name: 'login',
+    query: { redirect: router.currentRoute.value.fullPath },
+  }),
+)
 app.use(router)
 app.use(i18n)
 

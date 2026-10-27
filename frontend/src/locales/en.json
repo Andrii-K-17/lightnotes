@@ -1,5 +1,47 @@
 {
   "app": {
     "name": "LightNotes"
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Password",
+    "or": "or",
+    "google": "Continue with Google",
+    "login": {
+      "title": "Sign in",
+      "description": "Welcome back to LightNotes.",
+      "submit": "Sign in",
+      "noAccount": "No account yet?",
+      "toRegister": "Create one"
+    },
+    "register": {
+      "title": "Create account",
+      "description": "Ideas, always with you.",
+      "submit": "Create account",
+      "passwordHint": "At least 10 characters.",
+      "haveAccount": "Already have an account?",
+      "toLogin": "Sign in"
+    }
+  },
+  "errors": {
+    "unknown": "Something went wrong. Please try again.",
+    "internal_error": "Something went wrong on our side. Please try again.",
+    "network_error": "Can't reach the server. Check your connection.",
+    "rate_limited": "Too many requests. Please wait a moment.",
+    "validation": {
+      "failed": "Please check the entered data."
+    },
+    "auth": {
+      "invalid_credentials": "Incorrect email or password.",
+      "locked_out": "Too many failed attempts. Try again in a few minutes.",
+      "email_taken": "An account with this email already exists.",
+      "email_invalid": "Enter a valid email address.",
+      "password_invalid": "The password must be 10 to 128 characters long.",
+      "registration_failed": "The account could not be created.",
+      "google_not_configured": "Google sign-in is not available.",
+      "google_failed": "Google sign-in failed. Please try again.",
+      "google_sign_in_failed": "Google sign-in failed. Please try again.",
+      "google_email_unverified": "Your Google email address is not verified."
+    }
   }
 }
