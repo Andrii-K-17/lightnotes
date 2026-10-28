@@ -2,6 +2,7 @@ import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import type { components } from '@/lib/api'
 import { authApi } from '../api'
+import { closeDatabase, openDatabase } from '@/data'
 
 export type Profile = components['schemas']['UserProfile']
 type Status = 'unknown' | 'authenticated' | 'anonymous'
@@ -21,7 +22,9 @@ export const useSessionStore = defineStore('session', () => {
   }
 
   async function loadProfile(): Promise<void> {
-    profile.value = await authApi.me()
+    const loaded = await authApi.me()
+    await openDatabase(loaded.id)
+    profile.value = loaded
     status.value = 'authenticated'
   }
 
@@ -44,6 +47,7 @@ export const useSessionStore = defineStore('session', () => {
   }
 
   function clear(): void {
+    closeDatabase()
     accessToken = null
     profile.value = null
     status.value = 'anonymous'

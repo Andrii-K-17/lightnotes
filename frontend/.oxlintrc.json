@@ -31,8 +31,24 @@
           {
             "patterns": [
               {
+                "group": ["@/modules/**", "@/app/**", "@/data/**"],
+                "message": "Shared code must not depend on modules, data or the app shell."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["src/data/**"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
                 "group": ["@/modules/**", "@/app/**"],
-                "message": "Shared code must not depend on modules or the app shell."
+                "message": "The data layer must not depend on modules or the app shell."
               }
             ]
           }
