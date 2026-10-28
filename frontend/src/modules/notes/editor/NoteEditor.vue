@@ -3,6 +3,7 @@ import { EditorContent, useEditor, type JSONContent } from '@tiptap/vue-3'
 import { useI18n } from 'vue-i18n'
 import type { RichText } from '@/data'
 import { createExtensions } from './extensions'
+import EditorToolbar from './EditorToolbar.vue'
 import './editor.css'
 
 const props = defineProps<{
@@ -30,5 +31,12 @@ const editor = useEditor({
 </script>
 
 <template>
-  <EditorContent :editor="editor" />
+  <EditorToolbar
+    v-if="editor"
+    :editor="editor"
+  />
+  <EditorContent
+    :editor="editor"
+    class="pt-4"
+  />
 </template>

@@ -62,7 +62,23 @@
     "back": "Back"
   },
   "editor": {
-    "placeholder": "Start writing…"
+    "placeholder": "Start writing…",
+    "toolbar": "Formatting",
+    "bold": "Bold",
+    "italic": "Italic",
+    "underline": "Underline",
+    "strike": "Strikethrough",
+    "heading1": "Heading 1",
+    "heading2": "Heading 2",
+    "heading3": "Heading 3",
+    "quote": "Quote",
+    "code": "Code",
+    "link": "Link",
+    "undo": "Undo",
+    "redo": "Redo",
+    "linkUrl": "Link address",
+    "linkApply": "Apply",
+    "linkRemove": "Remove link"
   },
   "settings": {
     "title": "Settings",
