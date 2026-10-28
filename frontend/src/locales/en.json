@@ -58,6 +58,12 @@
       "hint": "Tap + to write your first note."
     }
   },
+  "common": {
+    "back": "Back"
+  },
+  "editor": {
+    "placeholder": "Start writing…"
+  },
   "settings": {
     "title": "Settings",
     "back": "Back to notes",
