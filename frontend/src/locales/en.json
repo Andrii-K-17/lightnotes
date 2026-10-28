@@ -46,18 +46,28 @@
         "title": "Sign-in failed",
         "back": "Back to sign in"
       }
-    },
-    "settings": {
-      "title": "Settings",
-      "back": "Back to notes",
-      "appearance": "Appearance",
-      "theme": {
-        "auto": "System",
-        "light": "Light",
-        "dark": "Dark"
-      },
-      "account": "Account",
-      "signOut": "Sign out"
     }
+  },
+  "notes": {
+    "title": "Notes",
+    "new": "New note",
+    "untitled": "Untitled",
+    "pinned": "Pinned",
+    "empty": {
+      "title": "No notes yet",
+      "hint": "Tap + to write your first note."
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "back": "Back to notes",
+    "appearance": "Appearance",
+    "theme": {
+      "auto": "System",
+      "light": "Light",
+      "dark": "Dark"
+    },
+    "account": "Account",
+    "signOut": "Sign out"
   }
 }

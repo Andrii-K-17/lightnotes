@@ -1,19 +1,79 @@
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
-import { useSessionStore } from '@/modules/auth'
+import { Button } from '@/components/ui/button'
+import { noteRepository } from '@/data'
+import { FileText, Plus, Settings } from '@lucide/vue'
+import { useLiveQuery } from '@/lib/live-query'
+import NoteCard from '../components/NoteCard.vue'
 
-const session = useSessionStore()
+const { data: notes } = useLiveQuery(() => noteRepository.listActive())
+
+async function createNote(): Promise<void> {
+  await noteRepository.create()
+}
 </script>
 
 <template>
-  <div class="flex items-center justify-between p-4">
-    <h1 class="text-2xl font-semibold">{{ $t('app.name') }}</h1>
-    <RouterLink
-      class="text-sm underline"
-      :to="{ name: 'settings' }"
+  <div class="mx-auto max-w-5xl px-4 pb-28 pt-6">
+    <header class="mb-5 flex items-center justify-between">
+      <h1 class="text-3xl font-semibold tracking-tight">
+        {{ $t('notes.title') }}
+      </h1>
+      <Button
+        as-child
+        variant="ghost"
+        size="icon"
+        :aria-label="$t('settings.title')"
+      >
+        <RouterLink :to="{ name: 'settings' }">
+          <Settings />
+        </RouterLink>
+      </Button>
+    </header>
+
+    <div
+      v-if="!notes"
+      class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4"
+      aria-hidden="true"
     >
-      {{ $t('settings.title') }}
-    </RouterLink>
+      <div
+        v-for="n in 8"
+        :key="n"
+        class="h-36 animate-pulse rounded-2xl bg-muted"
+      />
+    </div>
+
+    <div
+      v-else-if="notes.length === 0"
+      class="flex flex-col items-center gap-3 py-24 text-center"
+    >
+      <FileText class="size-12 text-muted-foreground/60" />
+      <p class="text-lg font-medium">
+        {{ $t('notes.empty.title') }}
+      </p>
+      <p class="text-sm text-muted-foreground">
+        {{ $t('notes.empty.hint') }}
+      </p>
+    </div>
+
+    <div
+      v-else
+      class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4"
+    >
+      <NoteCard
+        v-for="note in notes"
+        :key="note.id"
+        :note="note"
+      />
+    </div>
+
+    <Button
+      size="icon"
+      class="fixed bottom-6 right-6 size-14 rounded-full shadow-lg"
+      :aria-label="$t('notes.new')"
+      @click="createNote"
+    >
+      <Plus class="size-6" />
+    </Button>
   </div>
-  <p class="px-4 text-sm text-muted-foreground">{{ session.profile?.email }}</p>
 </template>
