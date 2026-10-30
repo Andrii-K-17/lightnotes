@@ -3,6 +3,18 @@ import { getDb, type NoteRecord, type RichText } from '../db'
 
 export const EMPTY_DOC: RichText = { type: 'doc', content: [{ type: 'paragraph' }] }
 
+type Block = { type?: string; content?: unknown[] }
+
+function isBlank(note: NoteRecord): boolean {
+  const blocks = (note.content.content as Block[] | undefined) ?? []
+
+  return (
+    note.title.trim() === '' &&
+    note.contentText.trim() === '' &&
+    blocks.every((block) => block.type === 'paragraph' && !block.content?.length)
+  )
+}
+
 export const noteRepository = {
   /** A new empty note, saved locally. */
   async create(): Promise<NoteRecord> {
@@ -45,5 +57,14 @@ export const noteRepository = {
     changes: Partial<Pick<NoteRecord, 'title' | 'content' | 'contentText'>>,
   ): Promise<void> {
     await getDb().notes.update(id, { ...changes, editedAt: Date.now(), syncStatus: 'dirty' })
+  },
+
+  /** Deletes a note that was created and left empty. */
+  async discardIfEmpty(id: string): Promise<void> {
+    const note = await getDb().notes.get(id)
+
+    if (note && note.serverVersion === 0 && isBlank(note)) {
+      await getDb().notes.delete(id)
+    }
   },
 }

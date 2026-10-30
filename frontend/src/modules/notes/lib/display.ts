@@ -1,8 +1,10 @@
 import type { NoteRecord } from '@/data'
 
-function firstLine(text: string): string {
+type DisplayableNote = Pick<NoteRecord, 'title'> & Partial<Pick<NoteRecord, 'contentText'>>
+
+function firstLine(text: string | undefined): string {
   return (
-    text
+    (text ?? '')
       .split('\n')
       .find((line) => line.trim() !== '')
       ?.trim() ?? ''
@@ -10,12 +12,12 @@ function firstLine(text: string): string {
 }
 
 /** Title for lists: the title, otherwise the first line of the text. */
-export function displayTitle(note: Pick<NoteRecord, 'title' | 'contentText'>): string {
+export function displayTitle(note: DisplayableNote): string {
   return note.title.trim() || firstLine(note.contentText)
 }
 
-export function displayPreview(note: Pick<NoteRecord, 'title' | 'contentText'>): string {
-  const text = note.contentText.trim()
+export function displayPreview(note: DisplayableNote): string {
+  const text = (note.contentText ?? '').trim()
   return note.title.trim() ? text : text.slice(firstLine(text).length).trim()
 }
 

@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { ArrowLeft } from '@lucide/vue'
-import { ref, watch } from 'vue'
+import { onBeforeUnmount, ref, watch } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { Button } from '@/components/ui/button'
 import { noteRepository, type NoteRecord } from '@/data'
+import { useAutosave } from '../composables/useAutosave'
 import NoteEditor from '../editor/NoteEditor.vue'
-import { useAutosave } from '../composables/useAutosave.ts'
 
 const props = defineProps<{ id: string }>()
 
@@ -13,11 +13,19 @@ const router = useRouter()
 const note = ref<NoteRecord>()
 const { schedule, flush } = useAutosave()
 
+async function leave(id: string): Promise<void> {
+  await flush()
+  await noteRepository.discardIfEmpty(id)
+}
+
 watch(
   () => props.id,
-  async (id) => {
-    note.value = undefined
+  async (id, previousId) => {
+    if (previousId) {
+      await leave(previousId)
+    }
 
+    note.value = undefined
     const found = await noteRepository.get(id)
 
     if (!found || found.deletedAt !== null) {
@@ -29,6 +37,8 @@ watch(
   },
   { immediate: true },
 )
+
+onBeforeUnmount(() => void leave(props.id))
 </script>
 
 <template>
@@ -49,9 +59,10 @@ watch(
     <NoteEditor
       v-if="note"
       :key="note.id"
+      :title="note.title"
       :content="note.content"
       :autofocus="note.title === '' && note.contentText === ''"
-      @change="(content, contentText) => schedule(note!.id, { content, contentText })"
+      @change="(changes) => schedule(note!.id, changes)"
       @blur="flush"
     />
   </div>

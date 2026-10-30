@@ -83,7 +83,8 @@
     "orderedList": "Numbered list",
     "taskList": "Checklist",
     "indent": "Increase indent",
-    "outdent": "Decrease indent"
+    "outdent": "Decrease indent",
+    "titlePlaceholder": "Title"
   },
   "settings": {
     "title": "Settings",

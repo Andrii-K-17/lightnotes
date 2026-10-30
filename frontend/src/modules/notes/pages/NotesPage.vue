@@ -1,19 +1,15 @@
 <script setup lang="ts">
-import { RouterLink, useRouter } from 'vue-router'
+import { RouterLink } from 'vue-router'
 import { Button } from '@/components/ui/button'
 import { noteRepository } from '@/data'
 import { FileText, Plus, Settings } from '@lucide/vue'
 import { useLiveQuery } from '@/lib/live-query'
 import NoteCard from '../components/NoteCard.vue'
+import { useNewNote } from '../composables/useNewNote'
 
 const { data: notes } = useLiveQuery(() => noteRepository.listActive())
 
-const router = useRouter()
-
-async function createNote(): Promise<void> {
-  const note = await noteRepository.create()
-  await router.push({ name: 'note', params: { id: note.id } })
-}
+const { createNote } = useNewNote()
 </script>
 
 <template>
