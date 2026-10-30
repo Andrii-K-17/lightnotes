@@ -37,6 +37,6 @@ const editor = useEditor({
   />
   <EditorContent
     :editor="editor"
-    class="pt-4"
+    class="pt-3"
   />
 </template>

@@ -5,11 +5,13 @@ import { RouterLink, useRouter } from 'vue-router'
 import { Button } from '@/components/ui/button'
 import { noteRepository, type NoteRecord } from '@/data'
 import NoteEditor from '../editor/NoteEditor.vue'
+import { useAutosave } from '../composables/useAutosave.ts'
 
 const props = defineProps<{ id: string }>()
 
 const router = useRouter()
 const note = ref<NoteRecord>()
+const { schedule, flush } = useAutosave()
 
 watch(
   () => props.id,
@@ -31,7 +33,7 @@ watch(
 
 <template>
   <div class="mx-auto max-w-3xl px-4 pb-24 pt-4">
-    <header class="mb-3">
+    <header>
       <Button
         as-child
         variant="ghost"
@@ -49,6 +51,8 @@ watch(
       :key="note.id"
       :content="note.content"
       :autofocus="note.title === '' && note.contentText === ''"
+      @change="(content, contentText) => schedule(note!.id, { content, contentText })"
+      @blur="flush"
     />
   </div>
 </template>

@@ -39,9 +39,10 @@ export const noteRepository = {
     return notes.sort((a, b) => Number(b.pinned) - Number(a.pinned))
   },
 
+  /** Saves a user edit and marks the note for sync. */
   async save(
     id: string,
-    changes: Pick<NoteRecord, 'title' | 'content' | 'contentText'>,
+    changes: Partial<Pick<NoteRecord, 'title' | 'content' | 'contentText'>>,
   ): Promise<void> {
     await getDb().notes.update(id, { ...changes, editedAt: Date.now(), syncStatus: 'dirty' })
   },
