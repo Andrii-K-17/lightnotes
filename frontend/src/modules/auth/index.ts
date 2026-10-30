@@ -1,3 +1,4 @@
 export { installAuth } from './install'
-export { useSessionStore, type Profile } from './stores/session'
+export { useSessionStore } from './stores/session'
 export { authRoutes } from './routes'
+export type { Profile } from './types'

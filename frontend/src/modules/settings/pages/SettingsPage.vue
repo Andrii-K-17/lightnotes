@@ -3,6 +3,9 @@ import { RouterLink, useRouter } from 'vue-router'
 import { Button } from '@/components/ui/button'
 import { useTheme } from '@/lib/theme'
 import { useSessionStore } from '@/modules/auth'
+import { ref } from 'vue'
+import { errorMessage } from '@/i18n/errors'
+import { ApiError } from '@/lib/api'
 
 const router = useRouter()
 const session = useSessionStore()
@@ -10,14 +13,24 @@ const theme = useTheme()
 
 const themes = ['auto', 'light', 'dark'] as const
 
+const signOutError = ref<string | null>(null)
+
 async function signOut(): Promise<void> {
-  await session.logout()
+  signOutError.value = null
+
+  try {
+    await session.logout()
+  } catch (error) {
+    signOutError.value = errorMessage(error instanceof ApiError ? error.code : 'unknown')
+    return
+  }
+
   await router.replace({ name: 'login' })
 }
 </script>
 
 <template>
-  <div class="mx-auto grid max-w-xl gap-8 p-4">
+  <div class="mx-auto grid max-w-3xl gap-8 p-4">
     <div class="flex items-center justify-between">
       <h1 class="text-2xl font-semibold">{{ $t('settings.title') }}</h1>
       <RouterLink
@@ -53,6 +66,13 @@ async function signOut(): Promise<void> {
       >
         {{ $t('settings.signOut') }}
       </Button>
+      <p
+        v-if="signOutError"
+        role="alert"
+        class="text-sm text-destructive"
+      >
+        {{ signOutError }}
+      </p>
     </section>
   </div>
 </template>

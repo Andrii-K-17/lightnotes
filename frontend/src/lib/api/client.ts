@@ -1,10 +1,12 @@
 import createClient from 'openapi-fetch'
 import type { paths } from './schema'
 
+export type RefreshResult = 'renewed' | 'rejected' | 'unreachable'
+
 /** Session callbacks used to authenticate requests and handle expired sessions. */
 export interface AuthHooks {
   getAccessToken: () => string | null
-  refresh: () => Promise<boolean>
+  refresh: () => Promise<RefreshResult>
   onSessionLost: () => void
 }
 
@@ -44,8 +46,13 @@ async function authFetch(request: Request): Promise<Response> {
     return response
   }
 
-  if (!(await hooks.refresh())) {
+  const outcome = await hooks.refresh()
+
+  if (outcome === 'rejected') {
     hooks.onSessionLost()
+  }
+
+  if (outcome !== 'renewed') {
     return response
   }
 

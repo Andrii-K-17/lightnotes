@@ -19,6 +19,11 @@ export class ApiError extends Error {
 
     return new ApiError(status, code, readFieldErrors(problem.errors))
   }
+
+  /** The request never got a response. */
+  get isNetwork(): boolean {
+    return this.status === 0
+  }
 }
 
 /** Checks whether a value is a string. */

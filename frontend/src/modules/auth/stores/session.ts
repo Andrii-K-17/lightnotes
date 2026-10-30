@@ -1,10 +1,11 @@
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
-import type { components } from '@/lib/api'
-import { authApi } from '../api'
 import { closeDatabase, openDatabase } from '@/data'
+import { ApiError, type RefreshResult } from '@/lib/api'
+import { authApi } from '../api'
+import { clearCachedProfile, readCachedProfile, writeCachedProfile } from '../profile-cache'
+import type { Profile } from '../types'
 
-export type Profile = components['schemas']['UserProfile']
 type Status = 'unknown' | 'authenticated' | 'anonymous'
 
 /** Manages the user's authentication state and in-memory access token. */
@@ -15,17 +16,23 @@ export const useSessionStore = defineStore('session', () => {
 
   let accessToken: string | null = null
   let restoring: Promise<void> | undefined
-  let refreshing: Promise<boolean> | undefined
+  let refreshing: Promise<RefreshResult> | undefined
 
   function getAccessToken(): string | null {
     return accessToken
   }
 
-  async function loadProfile(): Promise<void> {
-    const loaded = await authApi.me()
+  async function signIn(loaded: Profile): Promise<void> {
     await openDatabase(loaded.id)
     profile.value = loaded
     status.value = 'authenticated'
+  }
+
+  async function loadProfile(): Promise<void> {
+    const loaded = await authApi.me()
+
+    await signIn(loaded)
+    writeCachedProfile(loaded)
   }
 
   async function login(email: string, password: string): Promise<void> {
@@ -41,47 +48,68 @@ export const useSessionStore = defineStore('session', () => {
   async function logout(): Promise<void> {
     try {
       await authApi.logout()
-    } finally {
-      clear()
+    } catch (error) {
+      if (error instanceof ApiError && error.isNetwork) {
+        throw error
+      }
     }
+
+    clear()
   }
 
   function clear(): void {
     closeDatabase()
+    clearCachedProfile()
     accessToken = null
     profile.value = null
     status.value = 'anonymous'
   }
 
-  async function renewAccessToken(): Promise<boolean> {
+  async function renewAccessToken(): Promise<RefreshResult> {
     try {
       accessToken = (await authApi.refresh()).accessToken
-      return true
-    } catch {
-      return false
+
+      return 'renewed'
+    } catch (error) {
+      return error instanceof ApiError && error.status === 401 ? 'rejected' : 'unreachable'
     }
   }
 
-  function refresh(): Promise<boolean> {
+  function refresh(): Promise<RefreshResult> {
     refreshing ??= navigator.locks.request('ln-refresh', renewAccessToken).finally(() => {
       refreshing = undefined
     })
     return refreshing
   }
 
-  /** Restores the session from the refresh cookie. Runs once, later calls share the result. */
-  function restore(): Promise<void> {
-    restoring ??= (async () => {
+  async function restoreSession(): Promise<void> {
+    const outcome = await refresh()
+
+    if (outcome === 'rejected') {
+      return clear()
+    }
+
+    if (outcome === 'renewed') {
       try {
-        if (await refresh()) {
-          await loadProfile()
-          return
+        return await loadProfile()
+      } catch (error) {
+        if (!(error instanceof ApiError && error.isNetwork)) {
+          return clear()
         }
-      } catch {}
+      }
+    }
 
+    const cached = readCachedProfile()
+
+    if (cached) {
+      await signIn(cached)
+    } else {
       clear()
-    })()
+    }
+  }
 
+  function restore(): Promise<void> {
+    restoring ??= restoreSession().catch(clear)
     return restoring
   }
 
