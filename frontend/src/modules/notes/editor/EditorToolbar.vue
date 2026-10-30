@@ -23,6 +23,7 @@ import { nextTick, ref, useTemplateRef, type Component } from 'vue'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { listDepth, MAX_LIST_DEPTH } from './list-depth'
+import { useKeyboardInset } from '@/lib/keyboard-inset'
 
 const props = defineProps<{ editor: Editor }>()
 
@@ -170,6 +171,8 @@ const groups: Action[][] = [
   ],
 ]
 
+const keyboardInset = useKeyboardInset()
+
 const linkOpen = ref(false)
 const linkUrl = ref('')
 const linkInput = useTemplateRef<InstanceType<typeof Input>>('linkInput')
@@ -201,7 +204,10 @@ function removeLink(): void {
 </script>
 
 <template>
-  <div class="sticky top-0 z-10 -mx-4 border-b bg-background/90 px-4 py-2 backdrop-blur">
+  <div
+    class="z-10 bg-background/90 py-2 backdrop-blur max-md:fixed max-md:inset-x-0 max-md:bottom-(--keyboard-inset) max-md:border-t max-md:px-2 md:sticky md:top-0 md:-mx-4 md:border-b md:px-4"
+    :style="{ '--keyboard-inset': `${keyboardInset}px` }"
+  >
     <form
       v-if="linkOpen"
       class="flex items-center gap-2"

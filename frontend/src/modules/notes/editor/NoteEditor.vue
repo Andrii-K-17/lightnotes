@@ -29,7 +29,11 @@ const editor = useEditor({
   content: props.content as JSONContent,
   extensions: createExtensions(t('editor.placeholder')),
   autofocus: props.autofocus ? 'start' : false,
-  editorProps: { attributes: { class: 'note-prose min-h-[60vh] outline-none' } },
+  editorProps: {
+    attributes: { class: 'note-prose min-h-[60vh] outline-none' },
+    scrollMargin: { top: 80, bottom: 80, left: 0, right: 0 },
+    scrollThreshold: { top: 80, bottom: 95, left: 0, right: 0 },
+  },
   onUpdate: ({ editor }) =>
     emit('change', {
       content: editor.getJSON(),
