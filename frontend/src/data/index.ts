@@ -8,4 +8,4 @@ export {
   type SyncStatus,
   type TagRecord,
 } from './db'
-export { EMPTY_DOC, noteRepository } from './repositories/note-repository'
+export { EMPTY_DOC, noteRepository, type NoteScope } from './repositories/note-repository'

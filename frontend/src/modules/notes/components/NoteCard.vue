@@ -4,22 +4,21 @@ import type { NoteRecord } from '@/data'
 import { displayPreview, displayTitle, formatEditedAt } from '../lib/display'
 import { RouterLink } from 'vue-router'
 
-const props = defineProps<{ note: NoteRecord }>()
-
-const title = () => displayTitle(props.note)
+defineProps<{ note: NoteRecord }>()
 </script>
 
 <template>
   <RouterLink
     :to="{ name: 'note', params: { id: note.id } }"
+    active-class="border-primary/50 bg-accent/60"
     class="flex min-h-36 flex-col gap-2 rounded-2xl border bg-card p-4 text-card-foreground outline-none transition-colors hover:bg-accent/40 focus-visible:ring-2 focus-visible:ring-ring"
   >
     <div class="flex items-start justify-between gap-2">
       <h2
         class="line-clamp-2 font-medium"
-        :class="{ 'text-muted-foreground': !title() }"
+        :class="{ 'text-muted-foreground': !displayTitle(note) }"
       >
-        {{ title() || $t('notes.untitled') }}
+        {{ displayTitle(note) || $t('notes.untitled') }}
       </h2>
       <Pin
         v-if="note.pinned"

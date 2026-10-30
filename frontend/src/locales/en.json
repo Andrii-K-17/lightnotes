@@ -48,14 +48,27 @@
       }
     }
   },
+  "sidebar": {
+    "title": "Navigation",
+    "open": "Open menu",
+    "all": "All notes",
+    "pinned": "Pinned",
+    "unfiled": "Unfiled",
+    "trash": "Trash"
+  },
   "notes": {
     "title": "Notes",
     "new": "New note",
     "untitled": "Untitled",
     "pinned": "Pinned",
+    "noneSelected": "Select a note or create a new one.",
     "empty": {
-      "title": "No notes yet",
-      "hint": "Tap + to write your first note."
+      "all": "No notes yet",
+      "pinned": "No pinned notes",
+      "unfiled": "No unfiled notes",
+      "trash": "Trash is empty",
+      "folder": "No notes in this folder",
+      "hint": "Tap + to write a note."
     }
   },
   "common": {

@@ -240,7 +240,7 @@ function removeLink(): void {
 
     <div
       v-else
-      class="editor-toolbar-scroll flex items-center gap-1 overflow-x-auto"
+      class="flex items-center gap-1 overflow-x-auto"
       role="toolbar"
       :aria-label="$t('editor.toolbar')"
     >

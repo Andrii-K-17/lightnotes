@@ -29,6 +29,7 @@ export interface NoteRecord extends SyncFields {
   createdAt: number
   /** Last user edit time, used to keep list ordering stable after sync. */
   editedAt: number
+  purgedAt: number | null
 }
 
 export interface FolderRecord extends SyncFields {

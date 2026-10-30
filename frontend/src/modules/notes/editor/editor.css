@@ -3,28 +3,6 @@
   line-height: 1.7;
 }
 
-.editor-toolbar-scroll {
-  scrollbar-color: color-mix(in oklab, var(--muted-foreground) 45%, transparent) transparent;
-  scrollbar-width: thin;
-}
-
-.editor-toolbar-scroll::-webkit-scrollbar {
-  height: 0.3rem;
-}
-
-.editor-toolbar-scroll::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.editor-toolbar-scroll::-webkit-scrollbar-thumb {
-  border-radius: 9999px;
-  background: color-mix(in oklab, var(--muted-foreground) 45%, transparent);
-}
-
-.editor-toolbar-scroll::-webkit-scrollbar-thumb:hover {
-  background: color-mix(in oklab, var(--primary) 70%, transparent);
-}
-
 .note-prose > * + * {
   margin-top: 0.75rem;
 }
