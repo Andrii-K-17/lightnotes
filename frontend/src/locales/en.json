@@ -78,7 +78,12 @@
     "redo": "Redo",
     "linkUrl": "Link address",
     "linkApply": "Apply",
-    "linkRemove": "Remove link"
+    "linkRemove": "Remove link",
+    "bulletList": "Bulleted list",
+    "orderedList": "Numbered list",
+    "taskList": "Checklist",
+    "indent": "Increase indent",
+    "outdent": "Decrease indent"
   },
   "settings": {
     "title": "Settings",

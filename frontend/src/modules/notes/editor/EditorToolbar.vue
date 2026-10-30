@@ -12,11 +12,17 @@ import {
   Strikethrough,
   Underline,
   Undo2,
+  IndentDecrease,
+  IndentIncrease,
+  List,
+  ListChecks,
+  ListOrdered,
 } from '@lucide/vue'
 import type { Editor } from '@tiptap/vue-3'
 import { nextTick, ref, useTemplateRef, type Component } from 'vue'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { listDepth, MAX_LIST_DEPTH } from './list-depth'
 
 const props = defineProps<{ editor: Editor }>()
 
@@ -27,11 +33,14 @@ interface Action {
   active?: () => boolean
   disabled?: () => boolean
   run: () => void
+  hidden?: () => boolean
 }
 
 const chain = () => props.editor.chain().focus()
 const isActive = (name: string, attributes?: Record<string, unknown>) =>
   props.editor.isActive(name, attributes)
+const inList = () => isActive('listItem') || isActive('taskItem')
+const itemType = () => (isActive('taskItem') ? 'taskItem' : 'listItem')
 
 const groups: Action[][] = [
   [
@@ -101,6 +110,46 @@ const groups: Action[][] = [
       label: 'editor.heading3',
       active: () => isActive('heading', { level: 3 }),
       run: () => chain().toggleHeading({ level: 3 }).run(),
+    },
+  ],
+  [
+    {
+      id: 'bullet',
+      icon: List,
+      label: 'editor.bulletList',
+      active: () => isActive('bulletList'),
+      run: () => chain().toggleBulletList().run(),
+    },
+    {
+      id: 'ordered',
+      icon: ListOrdered,
+      label: 'editor.orderedList',
+      active: () => isActive('orderedList'),
+      run: () => chain().toggleOrderedList().run(),
+    },
+    {
+      id: 'task',
+      icon: ListChecks,
+      label: 'editor.taskList',
+      active: () => isActive('taskList'),
+      run: () => chain().toggleTaskList().run(),
+    },
+    {
+      id: 'outdent',
+      icon: IndentDecrease,
+      label: 'editor.outdent',
+      hidden: () => !inList(),
+      disabled: () => !props.editor.can().liftListItem(itemType()),
+      run: () => chain().liftListItem(itemType()).run(),
+    },
+    {
+      id: 'indent',
+      icon: IndentIncrease,
+      label: 'editor.indent',
+      hidden: () => !inList(),
+      disabled: () =>
+        listDepth(props.editor) >= MAX_LIST_DEPTH || !props.editor.can().sinkListItem(itemType()),
+      run: () => chain().sinkListItem(itemType()).run(),
     },
   ],
   [
@@ -185,7 +234,7 @@ function removeLink(): void {
 
     <div
       v-else
-      class="flex items-center gap-1 overflow-x-auto"
+      class="editor-toolbar-scroll flex items-center gap-1 overflow-x-auto"
       role="toolbar"
       :aria-label="$t('editor.toolbar')"
     >
@@ -198,24 +247,28 @@ function removeLink(): void {
           class="mx-1 h-5 w-px shrink-0 bg-border"
           aria-hidden="true"
         />
-        <Button
+        <template
           v-for="action in group"
           :key="action.id"
-          type="button"
-          size="icon"
-          :variant="action.active?.() ? 'secondary' : 'ghost'"
-          :disabled="action.disabled?.()"
-          :aria-label="$t(action.label)"
-          :title="$t(action.label)"
-          :aria-pressed="action.active ? action.active() : undefined"
-          @mousedown.prevent
-          @click="action.run()"
         >
-          <component
-            :is="action.icon"
-            class="size-4"
-          />
-        </Button>
+          <Button
+            v-if="!action.hidden?.()"
+            type="button"
+            size="icon"
+            :variant="action.active?.() ? 'secondary' : 'ghost'"
+            :disabled="action.disabled?.()"
+            :aria-label="$t(action.label)"
+            :title="$t(action.label)"
+            :aria-pressed="action.active ? action.active() : undefined"
+            @mousedown.prevent
+            @click="action.run()"
+          >
+            <component
+              :is="action.icon"
+              class="size-4"
+            />
+          </Button>
+        </template>
       </template>
 
       <span
