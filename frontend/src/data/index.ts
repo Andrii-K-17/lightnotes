@@ -9,3 +9,4 @@ export {
   type TagRecord,
 } from './db'
 export { EMPTY_DOC, noteRepository, type NoteScope } from './repositories/note-repository'
+export { FOLDER_NAME_MAX_LENGTH, folderRepository } from './repositories/folder-repository'

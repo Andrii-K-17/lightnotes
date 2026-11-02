@@ -4,6 +4,7 @@ import type { Component } from 'vue'
 import type { NoteScope } from '@/data'
 import { isSameScope, useNotesView } from '../stores/view'
 import SidebarItem from './SidebarItem.vue'
+import FolderList from './FolderList.vue'
 
 const emit = defineEmits<{ navigate: [] }>()
 const view = useNotesView()
@@ -48,6 +49,8 @@ function select(scope: NoteScope): void {
       </template>
       {{ $t(section.label) }}
     </SidebarItem>
+
+    <FolderList @navigate="emit('navigate')" />
 
     <div class="mt-auto pt-3">
       <SidebarItem :to="{ name: 'settings' }">

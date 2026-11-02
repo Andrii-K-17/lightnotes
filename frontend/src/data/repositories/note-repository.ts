@@ -189,6 +189,13 @@ async function emptyTrash(): Promise<void> {
   }
 }
 
+async function moveTo(id: string, folderId: string | null): Promise<void> {
+  await getDb().notes.update(id, {
+    folderId,
+    syncStatus: 'dirty',
+  })
+}
+
 export const noteRepository = {
   create,
   get: (id: string) => getDb().notes.get(id),
@@ -196,6 +203,7 @@ export const noteRepository = {
   save,
   discardIfEmpty,
   setPinned,
+  moveTo,
   moveToTrash,
   restore,
   purge,

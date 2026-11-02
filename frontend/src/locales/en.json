@@ -54,7 +54,8 @@
     "all": "All notes",
     "pinned": "Pinned",
     "unfiled": "Unfiled",
-    "trash": "Trash"
+    "trash": "Trash",
+    "folders": "Folders"
   },
   "notes": {
     "title": "Notes",
@@ -83,7 +84,18 @@
     "emptyTrash": "Empty trash",
     "emptyTrashTitle": "Empty the trash?",
     "emptyTrashDescription": "All notes in the trash will be deleted forever. This cannot be undone.",
-    "daysLeft": "{count} day left | {count} days left"
+    "daysLeft": "{count} day left | {count} days left",
+    "moveTo": "Move to folder",
+    "noFolder": "No folder"
+  },
+  "folders": {
+    "add": "New folder",
+    "namePlaceholder": "Folder name",
+    "actions": "Folder actions",
+    "rename": "Rename",
+    "delete": "Delete",
+    "deleteTitle": "Delete “{name}”?",
+    "deleteDescription": "The notes in this folder will be moved to the trash."
   },
   "common": {
     "back": "Back",

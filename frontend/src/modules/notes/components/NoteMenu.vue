@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { MoreHorizontal, Pin, PinOff, RotateCcw, Trash2 } from '@lucide/vue'
+import { Check, FolderInput, MoreHorizontal, Pin, PinOff, RotateCcw, Trash2 } from '@lucide/vue'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { toast } from 'vue-sonner'
@@ -10,8 +10,12 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { useFolders } from '../composables/useFolders'
 import { noteRepository, type NoteRecord } from '@/data'
 
 const props = defineProps<{ note: NoteRecord }>()
@@ -20,6 +24,7 @@ const emit = defineEmits<{ trashed: [] }>()
 const { t } = useI18n()
 const confirmPurge = ref(false)
 const trashed = computed(() => props.note.deletedAt !== null)
+const folders = useFolders()
 
 async function moveToTrash(): Promise<void> {
   const id = props.note.id
@@ -63,6 +68,39 @@ async function moveToTrash(): Promise<void> {
           />
           {{ note.pinned ? $t('notes.unpin') : $t('notes.pin') }}
         </DropdownMenuItem>
+
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger>
+            <FolderInput class="mr-2 size-4" />
+            {{ $t('notes.moveTo') }}
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent class="w-48">
+            <DropdownMenuItem @select="noteRepository.moveTo(note.id, null)">
+              <span class="mr-2 size-4">
+                <Check
+                  v-if="note.folderId === null"
+                  class="size-4"
+                />
+              </span>
+              {{ $t('notes.noFolder') }}
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              v-for="folder in folders ?? []"
+              :key="folder.id"
+              @select="noteRepository.moveTo(note.id, folder.id)"
+            >
+              <span class="mr-2 size-4">
+                <Check
+                  v-if="note.folderId === folder.id"
+                  class="size-4"
+                />
+              </span>
+              <span class="truncate">
+                {{ folder.name }}
+              </span>
+            </DropdownMenuItem>
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
 
         <DropdownMenuSeparator />
 

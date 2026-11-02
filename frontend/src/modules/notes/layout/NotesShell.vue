@@ -1,12 +1,22 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import NotesList from '../components/NotesList.vue'
 import NotesSidebar from '../components/NotesSidebar.vue'
+import { useNotesView } from '../stores/view.ts'
+import { provideFolders } from '../composables/useFolders.ts'
 
 const route = useRoute()
+const view = useNotesView()
+const folders = provideFolders()
 
 const hasNote = computed(() => route.name === 'note')
+
+watch([folders, () => view.scope], ([list, scope]) => {
+  if (list && scope.kind === 'folder' && !list.some((folder) => folder.id === scope.id)) {
+    view.select({ kind: 'all' })
+  }
+})
 </script>
 
 <template>

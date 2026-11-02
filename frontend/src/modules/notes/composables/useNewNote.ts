@@ -1,13 +1,14 @@
 import { useEventListener } from '@vueuse/core'
 import { useRouter } from 'vue-router'
 import { noteRepository } from '@/data'
+import { useNotesView } from '../stores/view'
 
 export function useNewNote() {
   const router = useRouter()
+  const view = useNotesView()
 
   async function createNote(): Promise<void> {
-    const note = await noteRepository.create()
-
+    const note = await noteRepository.create(view.scope.kind === 'folder' ? view.scope.id : null)
     await router.push({ name: 'note', params: { id: note.id } })
   }
 

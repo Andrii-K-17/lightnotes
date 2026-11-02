@@ -17,6 +17,7 @@ import { useNotesView } from '../stores/view'
 import NoteCard from './NoteCard.vue'
 import NotesSidebar from './NotesSidebar.vue'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
+import { useFolders } from '../composables/useFolders'
 
 const { t } = useI18n()
 const view = useNotesView()
@@ -26,7 +27,15 @@ const confirmEmpty = ref(false)
 
 const { data: notes } = useLiveQuery(() => noteRepository.list(view.scope), [() => view.scope])
 
-const title = computed(() => (view.scope.kind === 'folder' ? '' : t(`sidebar.${view.scope.kind}`)))
+const folders = useFolders()
+
+const title = computed(() => {
+  const scope = view.scope
+
+  return scope.kind === 'folder'
+    ? (folders.value?.find((folder) => folder.id === scope.id)?.name ?? '')
+    : t(`sidebar.${scope.kind}`)
+})
 </script>
 
 <template>
