@@ -114,10 +114,90 @@ async function discardIfEmpty(id: string): Promise<void> {
   }
 }
 
+async function setPinned(id: string, pinned: boolean): Promise<void> {
+  await getDb().notes.update(id, {
+    pinned,
+    syncStatus: 'dirty',
+  })
+}
+
+async function moveToTrash(id: string): Promise<void> {
+  await getDb().notes.update(id, {
+    deletedAt: Date.now(),
+    syncStatus: 'dirty',
+  })
+}
+
+/**
+ * Restores a trashed note.
+ * If its folder is gone, the note returns to the root.
+ */
+async function restore(id: string): Promise<void> {
+  const db = getDb()
+
+  await db.transaction('rw', db.notes, db.folders, async () => {
+    const note = await db.notes.get(id)
+
+    if (!note) {
+      return
+    }
+
+    const folder = note.folderId ? await db.folders.get(note.folderId) : undefined
+    const folderExists = folder !== undefined && folder.deletedAt === null
+
+    await db.notes.update(id, {
+      deletedAt: null,
+      folderId: folderExists ? note.folderId : null,
+      syncStatus: 'dirty',
+    })
+  })
+}
+
+/** Deletes a note forever. */
+async function purge(id: string): Promise<void> {
+  const db = getDb()
+  const note = await db.notes.get(id)
+
+  if (!note) {
+    return
+  }
+
+  if (note.serverVersion === 0) {
+    await db.notes.delete(id)
+    return
+  }
+
+  await db.notes.update(id, {
+    purgedAt: Date.now(),
+    title: '',
+    content: EMPTY_DOC,
+    contentText: '',
+    pinned: false,
+    tagIds: [],
+    folderId: null,
+    syncStatus: 'dirty',
+  })
+}
+
+async function emptyTrash(): Promise<void> {
+  const ids = await getDb()
+    .notes.filter((note) => note.deletedAt !== null && !note.purgedAt)
+    .primaryKeys()
+
+  for (const id of ids) {
+    await purge(id)
+  }
+}
+
 export const noteRepository = {
   create,
   get: (id: string) => getDb().notes.get(id),
   list,
   save,
   discardIfEmpty,
+  setPinned,
+  moveToTrash,
+  restore,
+  purge,
+  emptyTrash,
 }

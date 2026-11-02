@@ -6,8 +6,11 @@ import { FileText, Plus, Settings } from '@lucide/vue'
 import { useLiveQuery } from '@/lib/live-query'
 import NoteCard from '../components/NoteCard.vue'
 import { useNewNote } from '../composables/useNewNote'
+import { useNotesView } from '../stores/view.ts'
 
-const { data: notes } = useLiveQuery(() => noteRepository.listActive())
+const view = useNotesView()
+
+const { data: notes } = useLiveQuery(() => noteRepository.list(view.scope))
 
 const { createNote } = useNewNote()
 </script>

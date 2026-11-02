@@ -16,11 +16,13 @@ import { useNewNote } from '../composables/useNewNote'
 import { useNotesView } from '../stores/view'
 import NoteCard from './NoteCard.vue'
 import NotesSidebar from './NotesSidebar.vue'
+import ConfirmDialog from '@/components/ConfirmDialog.vue'
 
 const { t } = useI18n()
 const view = useNotesView()
 const { createNote } = useNewNote()
 const drawerOpen = ref(false)
+const confirmEmpty = ref(false)
 
 const { data: notes } = useLiveQuery(() => noteRepository.list(view.scope), [() => view.scope])
 
@@ -43,6 +45,23 @@ const title = computed(() => (view.scope.kind === 'folder' ? '' : t(`sidebar.${v
         {{ title }}
       </h1>
     </header>
+
+    <div
+      v-if="view.scope.kind === 'trash'"
+      class="flex items-center justify-between gap-3 px-4 pb-3 text-sm text-muted-foreground"
+    >
+      <span>
+        {{ $t('notes.trashHint') }}
+      </span>
+      <Button
+        variant="outline"
+        size="sm"
+        :disabled="!notes?.length"
+        @click="confirmEmpty = true"
+      >
+        {{ $t('notes.emptyTrash') }}
+      </Button>
+    </div>
 
     <div class="flex-1 overflow-y-auto px-4 pb-28">
       <div
@@ -88,12 +107,21 @@ const title = computed(() => (view.scope.kind === 'folder' ? '' : t(`sidebar.${v
     <Button
       v-if="view.scope.kind !== 'trash'"
       size="icon"
-      class="absolute bottom-6 right-6 size-14 rounded-full shadow-lg"
+      class="absolute bottom-6 right-6 size-14 rounded-full shadow-lg cursor-pointer"
       :aria-label="$t('notes.new')"
       @click="createNote"
     >
       <Plus class="size-6" />
     </Button>
+
+    <ConfirmDialog
+      v-model:open="confirmEmpty"
+      :title="$t('notes.emptyTrashTitle')"
+      :description="$t('notes.emptyTrashDescription')"
+      :confirm-label="$t('notes.emptyTrash')"
+      :cancel-label="$t('common.cancel')"
+      @confirm="noteRepository.emptyTrash()"
+    />
 
     <Sheet v-model:open="drawerOpen">
       <SheetContent

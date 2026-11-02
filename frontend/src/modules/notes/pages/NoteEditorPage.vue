@@ -6,12 +6,15 @@ import { Button } from '@/components/ui/button'
 import { noteRepository, type NoteRecord } from '@/data'
 import { useAutosave } from '../composables/useAutosave'
 import NoteEditor from '../editor/NoteEditor.vue'
+import { useLiveQuery } from '@/lib/live-query'
+import NoteMenu from '../components/NoteMenu.vue'
 
 const props = defineProps<{ id: string }>()
 
 const router = useRouter()
 const note = ref<NoteRecord>()
 const { schedule, flush } = useAutosave()
+const { data: liveNote } = useLiveQuery(() => noteRepository.get(props.id), [() => props.id])
 
 async function leave(id: string): Promise<void> {
   await flush()
@@ -43,7 +46,7 @@ onBeforeUnmount(() => void leave(props.id))
 
 <template>
   <div class="mx-auto max-w-3xl px-4 pb-24 pt-4">
-    <header>
+    <header class="mb-2 flex items-center justify-between">
       <Button
         as-child
         variant="ghost"
@@ -54,6 +57,11 @@ onBeforeUnmount(() => void leave(props.id))
           <ArrowLeft />
         </RouterLink>
       </Button>
+      <NoteMenu
+        v-if="liveNote"
+        :note="liveNote"
+        @trashed="router.replace({ name: 'home' })"
+      />
     </header>
 
     <NoteEditor

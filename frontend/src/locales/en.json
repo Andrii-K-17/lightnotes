@@ -69,10 +69,26 @@
       "trash": "Trash is empty",
       "folder": "No notes in this folder",
       "hint": "Tap + to write a note."
-    }
+    },
+    "actions": "Note actions",
+    "pin": "Pin",
+    "unpin": "Unpin",
+    "delete": "Move to trash",
+    "movedToTrash": "Moved to trash",
+    "restore": "Restore",
+    "deleteForever": "Delete forever",
+    "deleteForeverTitle": "Delete this note forever?",
+    "deleteForeverDescription": "This cannot be undone.",
+    "trashHint": "Notes are deleted forever after 30 days.",
+    "emptyTrash": "Empty trash",
+    "emptyTrashTitle": "Empty the trash?",
+    "emptyTrashDescription": "All notes in the trash will be deleted forever. This cannot be undone.",
+    "daysLeft": "{count} day left | {count} days left"
   },
   "common": {
-    "back": "Back"
+    "back": "Back",
+    "cancel": "Cancel",
+    "undo": "Undo"
   },
   "editor": {
     "placeholder": "Start writing…",
