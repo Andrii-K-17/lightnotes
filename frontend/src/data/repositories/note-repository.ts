@@ -6,6 +6,20 @@ export const EMPTY_DOC: RichText = {
   content: [{ type: 'paragraph' }],
 }
 
+export const EMPTY_CONTENT = JSON.stringify(EMPTY_DOC)
+
+/** Parses stored note content; unreadable content becomes an empty document. */
+export function parseContent(content: string): RichText {
+  try {
+    return JSON.parse(content) as RichText
+  } catch {
+    return EMPTY_DOC
+  }
+}
+
+/** Edits coming from the editor. */
+export type NoteEdit = Partial<Pick<NoteRecord, 'title' | 'contentText'>> & { content?: RichText }
+
 export type NoteScope =
   | { kind: 'all' }
   | { kind: 'unfiled' }
@@ -22,7 +36,7 @@ type Block = {
 }
 
 function isBlank(note: NoteRecord): boolean {
-  const blocks = (note.content.content as Block[] | undefined) ?? []
+  const blocks = (parseContent(note.content).content as Block[] | undefined) ?? []
 
   return (
     note.title.trim() === '' &&
@@ -63,7 +77,7 @@ async function create(folderId: string | null = null): Promise<NoteRecord> {
     id: newId(),
     folderId,
     title: '',
-    content: EMPTY_DOC,
+    content: EMPTY_CONTENT,
     contentText: '',
     pinned: false,
     tagIds: [],
@@ -94,12 +108,10 @@ async function list(scope: NoteScope): Promise<NoteRecord[]> {
 }
 
 /** Saves a user edit and marks the note for sync. */
-async function save(
-  id: string,
-  changes: Partial<Pick<NoteRecord, 'title' | 'content' | 'contentText'>>,
-): Promise<void> {
+async function save(id: string, { content, ...rest }: NoteEdit): Promise<void> {
   await getDb().notes.update(id, {
-    ...changes,
+    ...rest,
+    ...(content && { content: JSON.stringify(content) }),
     editedAt: Date.now(),
     syncStatus: 'dirty',
   })
@@ -170,7 +182,7 @@ async function purge(id: string): Promise<void> {
   await db.notes.update(id, {
     purgedAt: Date.now(),
     title: '',
-    content: EMPTY_DOC,
+    content: EMPTY_CONTENT,
     contentText: '',
     pinned: false,
     tagIds: [],

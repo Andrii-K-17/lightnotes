@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ArrowLeft } from '@lucide/vue'
-import { onBeforeUnmount, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { Button } from '@/components/ui/button'
-import { noteRepository, type NoteRecord } from '@/data'
+import { noteRepository, parseContent, type NoteRecord } from '@/data'
 import { useAutosave } from '../composables/useAutosave'
 import NoteEditor from '../editor/NoteEditor.vue'
 import { useLiveQuery } from '@/lib/live-query'
@@ -13,6 +13,8 @@ const props = defineProps<{ id: string }>()
 
 const router = useRouter()
 const note = ref<NoteRecord>()
+const initialContent = computed(() => (note.value ? parseContent(note.value.content) : undefined))
+
 const { schedule, flush } = useAutosave()
 const { data: liveNote } = useLiveQuery(() => noteRepository.get(props.id), [() => props.id])
 
@@ -68,7 +70,7 @@ onBeforeUnmount(() => void leave(props.id))
       v-if="note"
       :key="note.id"
       :title="note.title"
-      :content="note.content"
+      :content="initialContent!"
       :autofocus="note.title === '' && note.contentText === ''"
       @change="(changes) => schedule(note!.id, changes)"
       @blur="flush"

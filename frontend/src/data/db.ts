@@ -21,7 +21,7 @@ export interface NoteRecord extends SyncFields {
   id: string
   folderId: string | null
   title: string
-  content: RichText
+  content: string
   /** Plain text used for previews and search. */
   contentText: string
   pinned: boolean

@@ -1,8 +1,8 @@
 import { useDebounceFn, useEventListener } from '@vueuse/core'
 import { onBeforeUnmount } from 'vue'
-import { noteRepository, type NoteRecord } from '@/data'
+import { noteRepository, type NoteEdit } from '@/data'
 
-type Changes = Partial<Pick<NoteRecord, 'title' | 'content' | 'contentText'>>
+type Changes = NoteEdit
 
 const DEBOUNCE_MS = 800
 const MAX_WAIT_MS = 5000
