@@ -1,4 +1,5 @@
 import Dexie, { type EntityTable } from 'dexie'
+import { tokenize } from '@/lib/search'
 
 /**
  * `dirty` means unsynced changes.
@@ -30,6 +31,7 @@ export interface NoteRecord extends SyncFields {
   /** Last user edit time, used to keep list ordering stable after sync. */
   editedAt: number
   purgedAt: number | null
+  searchTokens: string[]
 }
 
 export interface FolderRecord extends SyncFields {
@@ -78,6 +80,17 @@ class LightNotesDb extends Dexie {
       attachments: 'id, noteId, uploadState',
       meta: 'key',
     })
+
+    this.version(2)
+      .stores({ notes: 'id, folderId, editedAt, deletedAt, syncStatus, *tagIds, *searchTokens' })
+      .upgrade((transaction) =>
+        transaction
+          .table<NoteRecord>('notes')
+          .toCollection()
+          .modify((note) => {
+            note.searchTokens = tokenize(note.title, note.contentText)
+          }),
+      )
   }
 }
 

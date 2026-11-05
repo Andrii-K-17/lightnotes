@@ -1,25 +1,4 @@
-import type { NoteRecord } from '@/data'
-
-type DisplayableNote = Pick<NoteRecord, 'title'> & Partial<Pick<NoteRecord, 'contentText'>>
-
-function firstLine(text: string | undefined): string {
-  return (
-    (text ?? '')
-      .split('\n')
-      .find((line) => line.trim() !== '')
-      ?.trim() ?? ''
-  )
-}
-
-/** Title for lists: the title, otherwise the first line of the text. */
-export function displayTitle(note: DisplayableNote): string {
-  return note.title.trim() || firstLine(note.contentText)
-}
-
-export function displayPreview(note: DisplayableNote): string {
-  const text = (note.contentText ?? '').trim()
-  return note.title.trim() ? text : text.slice(firstLine(text).length).trim()
-}
+export { displayPreview, displayTitle } from '@/lib/note-text'
 
 const sameYear = new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric' })
 const otherYear = new Intl.DateTimeFormat(undefined, {

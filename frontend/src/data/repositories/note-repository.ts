@@ -1,5 +1,8 @@
 import { newId } from '@/lib/id'
 import { getDb, type NoteRecord, type RichText } from '../db'
+import { textCollator } from '@/lib/collator'
+import { displayTitle } from '@/lib/note-text'
+import { tokenize } from '@/lib/search'
 
 export const EMPTY_DOC: RichText = {
   type: 'doc',
@@ -87,6 +90,7 @@ async function create(folderId: string | null = null): Promise<NoteRecord> {
     purgedAt: null,
     serverVersion: 0,
     syncStatus: 'dirty',
+    searchTokens: [],
   }
 
   await getDb().notes.add(note)
@@ -94,26 +98,93 @@ async function create(folderId: string | null = null): Promise<NoteRecord> {
   return note
 }
 
-/** Notes of a scope. */
-async function list(scope: NoteScope): Promise<NoteRecord[]> {
-  const notes = await getDb()
-    .notes.orderBy('editedAt')
-    .reverse()
-    .filter((note) => inScope(note, scope))
-    .toArray()
-
-  return scope.kind === 'trash'
-    ? notes.sort((a, b) => (b.deletedAt ?? 0) - (a.deletedAt ?? 0))
-    : notes.sort((a, b) => Number(b.pinned) - Number(a.pinned))
+export interface NoteSort {
+  by: 'edited' | 'created' | 'title'
+  direction: 'asc' | 'desc'
 }
 
-/** Saves a user edit and marks the note for sync. */
+export const DEFAULT_SORT: NoteSort = { by: 'edited', direction: 'desc' }
+
+export interface NoteQuery {
+  scope: NoteScope
+  tagIds: string[]
+  text: string
+  sort: NoteSort
+}
+
+function comparator(scope: NoteScope, sort: NoteSort): (a: NoteRecord, b: NoteRecord) => number {
+  if (scope.kind === 'trash') {
+    return (a, b) => (b.deletedAt ?? 0) - (a.deletedAt ?? 0)
+  }
+
+  const sign = sort.direction === 'asc' ? 1 : -1
+  const primary = (a: NoteRecord, b: NoteRecord): number => {
+    switch (sort.by) {
+      case 'edited':
+        return a.editedAt - b.editedAt
+      case 'created':
+        return a.createdAt - b.createdAt
+      case 'title':
+        return textCollator.compare(displayTitle(a), displayTitle(b))
+    }
+  }
+
+  return (a, b) => Number(b.pinned) - Number(a.pinned) || sign * primary(a, b)
+}
+
+async function searchNotes(terms: string[]): Promise<NoteRecord[]> {
+  const db = getDb()
+  let ids: Set<string> | undefined
+
+  for (const term of terms) {
+    const keys = new Set(await db.notes.where('searchTokens').startsWith(term).primaryKeys())
+
+    ids = ids ? new Set([...ids].filter((id) => keys.has(id))) : keys
+
+    if (ids.size === 0) {
+      return []
+    }
+  }
+
+  const notes = await db.notes.bulkGet([...(ids ?? [])])
+
+  return notes.filter((note): note is NoteRecord => note !== undefined)
+}
+
+async function query({ scope, tagIds, text, sort }: NoteQuery): Promise<NoteRecord[]> {
+  const matching = (note: NoteRecord) =>
+    inScope(note, scope) && tagIds.every((id) => note.tagIds.includes(id))
+
+  const terms = tokenize(text)
+  const notes =
+    terms.length > 0
+      ? (await searchNotes(terms)).filter(matching)
+      : await getDb().notes.filter(matching).toArray()
+
+  return notes.sort(comparator(scope, sort))
+}
+
+/** Saves a user edit, refreshes the search index and marks the note for sync. */
 async function save(id: string, { content, ...rest }: NoteEdit): Promise<void> {
-  await getDb().notes.update(id, {
-    ...rest,
-    ...(content && { content: JSON.stringify(content) }),
-    editedAt: Date.now(),
-    syncStatus: 'dirty',
+  const db = getDb()
+
+  await db.transaction('rw', db.notes, async () => {
+    const note = await db.notes.get(id)
+
+    if (!note) {
+      return
+    }
+
+    const title = rest.title ?? note.title
+    const contentText = rest.contentText ?? note.contentText
+
+    await db.notes.update(id, {
+      ...rest,
+      ...(content && { content: JSON.stringify(content) }),
+      searchTokens: tokenize(title, contentText),
+      editedAt: Date.now(),
+      syncStatus: 'dirty',
+    })
   })
 }
 
@@ -211,7 +282,8 @@ async function moveTo(id: string, folderId: string | null): Promise<void> {
 export const noteRepository = {
   create,
   get: (id: string) => getDb().notes.get(id),
-  list,
+  query,
+  list: (scope: NoteScope) => query({ scope, tagIds: [], text: '', sort: DEFAULT_SORT }),
   save,
   discardIfEmpty,
   setPinned,
