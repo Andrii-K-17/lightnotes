@@ -58,5 +58,8 @@ const editor = useEditor({
     @keydown.enter.prevent="editor?.commands.focus('start')"
     @blur="emit('blur')"
   />
+
+  <slot name="meta" />
+
   <EditorContent :editor="editor" />
 </template>

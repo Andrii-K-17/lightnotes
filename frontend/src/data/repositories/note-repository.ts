@@ -38,6 +38,8 @@ type Block = {
   content?: unknown[]
 }
 
+export const MAX_TAGS_PER_NOTE = 20
+
 function isBlank(note: NoteRecord): boolean {
   const blocks = (parseContent(note.content).content as Block[] | undefined) ?? []
 
@@ -279,11 +281,44 @@ async function moveTo(id: string, folderId: string | null): Promise<void> {
   })
 }
 
+async function addTag(id: string, tagId: string): Promise<void> {
+  const db = getDb()
+
+  await db.transaction('rw', db.notes, async () => {
+    const note = await db.notes.get(id)
+
+    if (!note || note.tagIds.includes(tagId) || note.tagIds.length >= MAX_TAGS_PER_NOTE) {
+      return
+    }
+
+    await db.notes.update(id, {
+      tagIds: [...note.tagIds, tagId],
+      syncStatus: 'dirty',
+    })
+  })
+}
+
+async function removeTag(id: string, tagId: string): Promise<void> {
+  const db = getDb()
+
+  await db.transaction('rw', db.notes, async () => {
+    const note = await db.notes.get(id)
+
+    if (note) {
+      await db.notes.update(id, {
+        tagIds: note.tagIds.filter((t) => t !== tagId),
+        syncStatus: 'dirty',
+      })
+    }
+  })
+}
+
 export const noteRepository = {
   create,
   get: (id: string) => getDb().notes.get(id),
   query,
-  list: (scope: NoteScope) => query({ scope, tagIds: [], text: '', sort: DEFAULT_SORT }),
+  addTag,
+  removeTag,
   save,
   discardIfEmpty,
   setPinned,

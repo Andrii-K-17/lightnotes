@@ -55,7 +55,8 @@
     "pinned": "Pinned",
     "unfiled": "Unfiled",
     "trash": "Trash",
-    "folders": "Folders"
+    "folders": "Folders",
+    "tags": "Tags"
   },
   "notes": {
     "title": "Notes",
@@ -96,6 +97,20 @@
     "delete": "Delete",
     "deleteTitle": "Delete “{name}”?",
     "deleteDescription": "The notes in this folder will be moved to the trash."
+  },
+  "tags": {
+    "add": "New tag",
+    "namePlaceholder": "Tag name",
+    "actions": "Tag actions",
+    "rename": "Rename",
+    "delete": "Delete",
+    "deleteTitle": "Delete “{name}”?",
+    "deleteDescription": "The tag will be removed from all notes.",
+    "duplicate": "A tag with this name already exists.",
+    "clearFilter": "Clear tag filter",
+    "limit": "A note can have up to 20 tags.",
+    "addToNote": "Add tag",
+    "remove": "Remove tag {name}"
   },
   "common": {
     "back": "Back",

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { FileText, Menu, Plus } from '@lucide/vue'
+import { FileText, Menu, Plus, X } from '@lucide/vue'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Button } from '@/components/ui/button'
@@ -10,7 +10,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet'
-import { noteRepository } from '@/data'
+import { DEFAULT_SORT, noteRepository } from '@/data'
 import { useLiveQuery } from '@/lib/live-query'
 import { useNewNote } from '../composables/useNewNote'
 import { useNotesView } from '../stores/view'
@@ -18,14 +18,13 @@ import NoteCard from './NoteCard.vue'
 import NotesSidebar from './NotesSidebar.vue'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import { useFolders } from '../composables/useFolders'
+import { useTags } from '../composables/useTags'
 
 const { t } = useI18n()
 const view = useNotesView()
 const { createNote } = useNewNote()
 const drawerOpen = ref(false)
 const confirmEmpty = ref(false)
-
-const { data: notes } = useLiveQuery(() => noteRepository.list(view.scope), [() => view.scope])
 
 const folders = useFolders()
 
@@ -36,6 +35,20 @@ const title = computed(() => {
     ? (folders.value?.find((folder) => folder.id === scope.id)?.name ?? '')
     : t(`sidebar.${scope.kind}`)
 })
+
+const tags = useTags()
+
+const selectedTags = computed(() =>
+  view.tagIds
+    .map((id) => tags.value?.find((tag) => tag.id === id))
+    .filter((tag) => tag !== undefined),
+)
+
+const { data: notes } = useLiveQuery(
+  () =>
+    noteRepository.query({ scope: view.scope, tagIds: view.tagIds, text: '', sort: DEFAULT_SORT }),
+  [() => view.scope, () => view.tagIds],
+)
 </script>
 
 <template>
@@ -54,6 +67,35 @@ const title = computed(() => {
         {{ title }}
       </h1>
     </header>
+
+    <div
+      v-if="selectedTags.length"
+      class="flex flex-wrap items-center gap-2 px-4 pb-3"
+    >
+      <span
+        v-for="tag in selectedTags"
+        :key="tag.id"
+        class="inline-flex items-center gap-1 rounded-full bg-accent px-3 py-1 text-xs text-accent-foreground"
+      >
+        {{ tag.name }}
+        <button
+          type="button"
+          class="rounded-full p-0.5 outline-none hover:bg-background/60"
+          :aria-label="$t('tags.remove', { name: tag.name })"
+          @click="view.toggleTag(tag.id)"
+        >
+          <X class="size-3" />
+        </button>
+      </span>
+
+      <button
+        type="button"
+        class="text-xs text-muted-foreground underline"
+        @click="view.clearTags()"
+      >
+        {{ $t('tags.clearFilter') }}
+      </button>
+    </div>
 
     <div
       v-if="view.scope.kind === 'trash'"

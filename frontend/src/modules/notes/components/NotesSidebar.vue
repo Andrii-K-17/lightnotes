@@ -5,6 +5,7 @@ import type { NoteScope } from '@/data'
 import { isSameScope, useNotesView } from '../stores/view'
 import SidebarItem from './SidebarItem.vue'
 import FolderList from './FolderList.vue'
+import TagList from './TagList.vue'
 
 const emit = defineEmits<{ navigate: [] }>()
 const view = useNotesView()
@@ -51,6 +52,8 @@ function select(scope: NoteScope): void {
     </SidebarItem>
 
     <FolderList @navigate="emit('navigate')" />
+
+    <TagList />
 
     <div class="mt-auto pt-3">
       <SidebarItem :to="{ name: 'settings' }">

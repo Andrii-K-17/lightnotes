@@ -9,10 +9,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Input } from '@/components/ui/input'
 import { FOLDER_NAME_MAX_LENGTH, folderRepository, type FolderRecord } from '@/data'
 import { useFolders } from '../composables/useFolders'
 import { isSameScope, useNotesView } from '../stores/view'
+import InlineNameInput from './InlineNameInput.vue'
 import SidebarItem from './SidebarItem.vue'
 
 const emit = defineEmits<{ navigate: [] }>()
@@ -21,55 +21,29 @@ const view = useNotesView()
 const folders = useFolders()
 
 const editing = ref<string | null>(null)
-const draft = ref('')
 
 const deleteOpen = ref(false)
 const deleteName = ref('')
 let deleteTarget: FolderRecord | undefined
-
-const vFocus = {
-  mounted: (element: HTMLElement) => {
-    element.focus()
-
-    if (element instanceof HTMLInputElement) {
-      element.select()
-    }
-  },
-}
 
 function select(folder: FolderRecord): void {
   view.select({ kind: 'folder', id: folder.id })
   emit('navigate')
 }
 
-function startAdd(): void {
-  draft.value = ''
-  editing.value = 'new'
-}
-
-function startRename(folder: FolderRecord): void {
-  draft.value = folder.name
-  editing.value = folder.id
-}
-
-async function commit(): Promise<void> {
-  const id = editing.value
-
+async function addFolder(name: string): Promise<void> {
   editing.value = null
 
-  if (id === 'new') {
-    const created = await folderRepository.create(draft.value)
+  const created = await folderRepository.create(name)
 
-    if (created) {
-      select(created)
-    }
-  } else if (id) {
-    await folderRepository.rename(id, draft.value)
+  if (created) {
+    select(created)
   }
 }
 
-function cancel(): void {
+async function renameFolder(id: string, name: string): Promise<void> {
   editing.value = null
+  await folderRepository.rename(id, name)
 }
 
 function requestDelete(folder: FolderRecord): void {
@@ -104,7 +78,7 @@ async function confirmDelete(): Promise<void> {
         size="icon"
         class="size-7"
         :aria-label="$t('folders.add')"
-        @click="startAdd"
+        @click="editing = 'new'"
       >
         <Plus class="size-4" />
       </Button>
@@ -114,20 +88,17 @@ async function confirmDelete(): Promise<void> {
       v-for="folder in folders"
       :key="folder.id"
     >
-      <Input
+      <InlineNameInput
         v-if="editing === folder.id"
-        v-model="draft"
-        v-focus
-        class="my-1 h-9"
-        :maxlength="FOLDER_NAME_MAX_LENGTH"
-        :aria-label="$t('folders.namePlaceholder')"
-        @keydown.enter.prevent="commit"
-        @keydown.esc="cancel"
-        @blur="commit"
+        :initial="folder.name"
+        :max-length="FOLDER_NAME_MAX_LENGTH"
+        :placeholder="$t('folders.namePlaceholder')"
+        @commit="(name) => renameFolder(folder.id, name)"
+        @cancel="editing = null"
       />
       <div
         v-else
-        class="group relative"
+        class="relative"
       >
         <SidebarItem
           :active="isSameScope(view.scope, { kind: 'folder', id: folder.id })"
@@ -154,7 +125,7 @@ async function confirmDelete(): Promise<void> {
             align="end"
             class="w-40"
           >
-            <DropdownMenuItem @select="startRename(folder)">
+            <DropdownMenuItem @select="editing = folder.id">
               <Pencil class="mr-2 size-4" />
               {{ $t('folders.rename') }}
             </DropdownMenuItem>
@@ -170,17 +141,12 @@ async function confirmDelete(): Promise<void> {
       </div>
     </template>
 
-    <Input
+    <InlineNameInput
       v-if="editing === 'new'"
-      v-model="draft"
-      v-focus
-      class="my-1 h-9"
-      :maxlength="FOLDER_NAME_MAX_LENGTH"
+      :max-length="FOLDER_NAME_MAX_LENGTH"
       :placeholder="$t('folders.namePlaceholder')"
-      :aria-label="$t('folders.namePlaceholder')"
-      @keydown.enter.prevent="commit"
-      @keydown.esc="cancel"
-      @blur="commit"
+      @commit="addFolder"
+      @cancel="editing = null"
     />
 
     <ConfirmDialog

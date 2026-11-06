@@ -8,6 +8,7 @@ import { useAutosave } from '../composables/useAutosave'
 import NoteEditor from '../editor/NoteEditor.vue'
 import { useLiveQuery } from '@/lib/live-query'
 import NoteMenu from '../components/NoteMenu.vue'
+import NoteTags from '../editor/NoteTags.vue'
 
 const props = defineProps<{ id: string }>()
 
@@ -74,6 +75,13 @@ onBeforeUnmount(() => void leave(props.id))
       :autofocus="note.title === '' && note.contentText === ''"
       @change="(changes) => schedule(note!.id, changes)"
       @blur="flush"
-    />
+    >
+      <template #meta>
+        <NoteTags
+          :note-id="note.id"
+          :tag-ids="liveNote?.tagIds ?? note.tagIds"
+        />
+      </template>
+    </NoteEditor>
   </div>
 </template>

@@ -5,16 +5,24 @@ import NotesList from '../components/NotesList.vue'
 import NotesSidebar from '../components/NotesSidebar.vue'
 import { useNotesView } from '../stores/view.ts'
 import { provideFolders } from '../composables/useFolders.ts'
+import { provideTags } from '../composables/useTags.ts'
 
 const route = useRoute()
 const view = useNotesView()
 const folders = provideFolders()
+const tags = provideTags()
 
 const hasNote = computed(() => route.name === 'note')
 
 watch([folders, () => view.scope], ([list, scope]) => {
   if (list && scope.kind === 'folder' && !list.some((folder) => folder.id === scope.id)) {
     view.select({ kind: 'all' })
+  }
+})
+
+watch(tags, (list) => {
+  if (list && view.tagIds.some((id) => !list.some((tag) => tag.id === id))) {
+    view.tagIds = view.tagIds.filter((id) => list.some((tag) => tag.id === id))
   }
 })
 </script>
