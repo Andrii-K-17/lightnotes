@@ -1,8 +1,18 @@
 <script setup lang="ts">
-import { FileText, Menu, Plus, X } from '@lucide/vue'
-import { computed, ref } from 'vue'
+import { ArrowDownUp, FileText, LayoutGrid, List, Menu, Plus, Search, X } from '@lucide/vue'
+import { refDebounced, useEventListener } from '@vueuse/core'
+import { computed, ref, toRef, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { Input } from '@/components/ui/input'
 import {
   Sheet,
   SheetContent,
@@ -10,23 +20,38 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet'
-import { DEFAULT_SORT, noteRepository } from '@/data'
+import { noteRepository, type NoteSort } from '@/data'
 import { useLiveQuery } from '@/lib/live-query'
+import { useFolders } from '../composables/useFolders'
 import { useNewNote } from '../composables/useNewNote'
+import { useTags } from '../composables/useTags'
 import { useNotesView } from '../stores/view'
 import NoteCard from './NoteCard.vue'
 import NotesSidebar from './NotesSidebar.vue'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
-import { useFolders } from '../composables/useFolders'
-import { useTags } from '../composables/useTags'
 
 const { t } = useI18n()
 const view = useNotesView()
+const folders = useFolders()
+const tags = useTags()
 const { createNote } = useNewNote()
+
 const drawerOpen = ref(false)
 const confirmEmpty = ref(false)
+const searchInput = useTemplateRef<InstanceType<typeof Input>>('searchInput')
 
-const folders = useFolders()
+const searchText = refDebounced(toRef(view, 'query'), 150)
+
+const { data: notes } = useLiveQuery(
+  () =>
+    noteRepository.query({
+      scope: view.scope,
+      tagIds: view.tagIds,
+      text: searchText.value,
+      sort: view.sort,
+    }),
+  [() => view.scope, () => view.tagIds, searchText, () => view.sort],
+)
 
 const title = computed(() => {
   const scope = view.scope
@@ -36,24 +61,35 @@ const title = computed(() => {
     : t(`sidebar.${scope.kind}`)
 })
 
-const tags = useTags()
-
 const selectedTags = computed(() =>
   view.tagIds
     .map((id) => tags.value?.find((tag) => tag.id === id))
     .filter((tag) => tag !== undefined),
 )
 
-const { data: notes } = useLiveQuery(
-  () =>
-    noteRepository.query({ scope: view.scope, tagIds: view.tagIds, text: '', sort: DEFAULT_SORT }),
-  [() => view.scope, () => view.tagIds],
-)
+const filtering = computed(() => searchText.value.trim() !== '' || view.tagIds.length > 0)
+
+const sortBy = computed({
+  get: () => view.sort.by as string,
+  set: (by: string) => (view.sort = { ...view.sort, by: by as NoteSort['by'] }),
+})
+const sortDirection = computed({
+  get: () => view.sort.direction as string,
+  set: (direction: string) =>
+    (view.sort = { ...view.sort, direction: direction as NoteSort['direction'] }),
+})
+
+useEventListener(window, 'keydown', (event) => {
+  if (event.code === 'KeyK' && (event.ctrlKey || event.metaKey)) {
+    event.preventDefault()
+    searchInput.value?.$el.focus()
+  }
+})
 </script>
 
 <template>
   <div class="relative flex h-full flex-col">
-    <header class="flex items-center gap-2 px-4 pb-3 pt-5">
+    <header class="flex items-center gap-1 px-4 pb-3 pt-5">
       <Button
         variant="ghost"
         size="icon"
@@ -66,7 +102,83 @@ const { data: notes } = useLiveQuery(
       <h1 class="min-w-0 flex-1 truncate text-2xl font-semibold tracking-tight">
         {{ title }}
       </h1>
+
+      <Button
+        variant="ghost"
+        size="icon"
+        :aria-label="view.viewMode === 'grid' ? $t('view.list') : $t('view.grid')"
+        @click="view.viewMode = view.viewMode === 'grid' ? 'list' : 'grid'"
+      >
+        <List v-if="view.viewMode === 'grid'" />
+        <LayoutGrid v-else />
+      </Button>
+
+      <DropdownMenu>
+        <DropdownMenuTrigger as-child>
+          <Button
+            variant="ghost"
+            size="icon"
+            :aria-label="$t('sort.label')"
+          >
+            <ArrowDownUp />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent
+          align="end"
+          class="w-48"
+        >
+          <DropdownMenuRadioGroup v-model="sortBy">
+            <DropdownMenuRadioItem value="edited">
+              {{ $t('sort.edited') }}
+            </DropdownMenuRadioItem>
+            <DropdownMenuRadioItem value="created">
+              {{ $t('sort.created') }}
+            </DropdownMenuRadioItem>
+            <DropdownMenuRadioItem value="title">
+              {{ $t('sort.title') }}
+            </DropdownMenuRadioItem>
+          </DropdownMenuRadioGroup>
+
+          <DropdownMenuSeparator />
+
+          <DropdownMenuRadioGroup v-model="sortDirection">
+            <DropdownMenuRadioItem value="desc">
+              {{ $t('sort.desc') }}
+            </DropdownMenuRadioItem>
+            <DropdownMenuRadioItem value="asc">
+              {{ $t('sort.asc') }}
+            </DropdownMenuRadioItem>
+          </DropdownMenuRadioGroup>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </header>
+
+    <div class="px-4 pb-3">
+      <div class="relative">
+        <Search
+          class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+        />
+        <Input
+          ref="searchInput"
+          v-model="view.query"
+          type="text"
+          class="rounded-full bg-muted/60 pl-10 pr-10"
+          :placeholder="$t('search.placeholder')"
+          :aria-label="$t('search.placeholder')"
+          @keydown.esc="view.query = ''"
+        />
+        <Button
+          v-if="view.query"
+          variant="ghost"
+          size="icon"
+          class="absolute right-2 top-1/2 size-7 -translate-y-1/2 rounded-full"
+          :aria-label="$t('search.clear')"
+          @click="view.query = ''"
+        >
+          <X class="size-4" />
+        </Button>
+      </div>
+    </div>
 
     <div
       v-if="selectedTags.length"
@@ -117,7 +229,8 @@ const { data: notes } = useLiveQuery(
     <div class="flex-1 overflow-y-auto px-4 pb-28">
       <div
         v-if="!notes"
-        class="grid grid-cols-2 gap-3 sm:grid-cols-1"
+        class="grid gap-3"
+        :class="view.viewMode === 'grid' ? 'grid-cols-2' : 'grid-cols-1'"
         aria-hidden="true"
       >
         <div
@@ -133,10 +246,10 @@ const { data: notes } = useLiveQuery(
       >
         <FileText class="size-12 text-muted-foreground/60" />
         <p class="text-lg font-medium">
-          {{ $t(`notes.empty.${view.scope.kind}`) }}
+          {{ filtering ? $t('notes.noResults') : $t(`notes.empty.${view.scope.kind}`) }}
         </p>
         <p
-          v-if="view.scope.kind === 'all' || view.scope.kind === 'folder'"
+          v-if="!filtering && (view.scope.kind === 'all' || view.scope.kind === 'folder')"
           class="text-sm text-muted-foreground"
         >
           {{ $t('notes.empty.hint') }}
@@ -145,12 +258,14 @@ const { data: notes } = useLiveQuery(
 
       <div
         v-else
-        class="grid grid-cols-2 gap-3 sm:grid-cols-1"
+        class="grid gap-3"
+        :class="view.viewMode === 'grid' ? 'grid-cols-2' : 'grid-cols-1'"
       >
         <NoteCard
           v-for="note in notes"
           :key="note.id"
           :note="note"
+          :compact="view.viewMode === 'list'"
         />
       </div>
     </div>
@@ -158,7 +273,7 @@ const { data: notes } = useLiveQuery(
     <Button
       v-if="view.scope.kind !== 'trash'"
       size="icon"
-      class="absolute bottom-6 right-6 size-14 rounded-full shadow-lg cursor-pointer"
+      class="absolute bottom-6 right-6 size-14 rounded-full shadow-lg"
       :aria-label="$t('notes.new')"
       @click="createNote"
     >

@@ -1,11 +1,14 @@
 import { useStorage } from '@vueuse/core'
 import { defineStore } from 'pinia'
-import type { NoteScope } from '@/data'
+import { DEFAULT_SORT, type NoteScope, type NoteSort } from '@/data'
 import { ref } from 'vue'
 
 export const useNotesView = defineStore('notes-view', () => {
   const scope = useStorage<NoteScope>('lightnotes.scope', { kind: 'all' })
   const tagIds = ref<string[]>([])
+  const sort = useStorage<NoteSort>('lightnotes.sort', DEFAULT_SORT)
+  const viewMode = useStorage<'grid' | 'list'>('lightnotes.viewMode', 'grid')
+  const query = ref('')
 
   function select(next: NoteScope): void {
     scope.value = next
@@ -24,6 +27,9 @@ export const useNotesView = defineStore('notes-view', () => {
   return {
     scope,
     tagIds,
+    sort,
+    viewMode,
+    query,
     select,
     toggleTag,
     clearTags,

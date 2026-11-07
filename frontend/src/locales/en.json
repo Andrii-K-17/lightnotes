@@ -87,7 +87,8 @@
     "emptyTrashDescription": "All notes in the trash will be deleted forever. This cannot be undone.",
     "daysLeft": "{count} day left | {count} days left",
     "moveTo": "Move to folder",
-    "noFolder": "No folder"
+    "noFolder": "No folder",
+    "noResults": "No notes found"
   },
   "folders": {
     "add": "New folder",
@@ -153,5 +154,21 @@
     },
     "account": "Account",
     "signOut": "Sign out"
+  },
+  "search": {
+    "placeholder": "Search notes",
+    "clear": "Clear search"
+  },
+  "sort": {
+    "label": "Sort",
+    "edited": "Last edited",
+    "created": "Date created",
+    "title": "Title",
+    "asc": "Ascending",
+    "desc": "Descending"
+  },
+  "view": {
+    "grid": "Grid view",
+    "list": "List view"
   }
 }

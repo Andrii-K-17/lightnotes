@@ -4,7 +4,10 @@ import type { NoteRecord } from '@/data'
 import { displayPreview, displayTitle, formatEditedAt } from '../lib/display'
 import { daysLeftInTrash } from '../lib/trash'
 
-defineProps<{ note: NoteRecord }>()
+defineProps<{
+  note: NoteRecord
+  compact?: boolean
+}>()
 </script>
 
 <template>
@@ -21,7 +24,10 @@ defineProps<{ note: NoteRecord }>()
       {{ displayTitle(note) || $t('notes.untitled') }}
     </h2>
   </div>
-  <p class="line-clamp-4 text-sm text-muted-foreground">
+  <p
+    class="text-sm text-muted-foreground"
+    :class="compact ? 'line-clamp-2' : 'line-clamp-4'"
+  >
     {{ displayPreview(note) }}
   </p>
   <p
