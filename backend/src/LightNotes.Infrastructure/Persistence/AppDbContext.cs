@@ -26,6 +26,8 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options, ICurren
 
     internal DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
+    public void Discard(object entity) => Entry(entity).State = EntityState.Detached;
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);

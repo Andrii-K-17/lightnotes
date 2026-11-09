@@ -18,4 +18,7 @@ public interface IAppDbContext
     DbSet<Attachment> Attachments { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>Forgets an entity and its unsaved changes.</summary>
+    void Discard(object entity);
 }
