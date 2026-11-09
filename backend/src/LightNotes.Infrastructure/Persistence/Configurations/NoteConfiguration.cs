@@ -15,7 +15,7 @@ internal sealed class NoteConfiguration : IEntityTypeConfiguration<Note>
         builder.ConfigureSyncEntity("notes");
 
         builder.Property(n => n.Title).HasMaxLength(Note.MaxTitleLength);
-        builder.Property(n => n.Content).HasColumnType("jsonb");
+        builder.Property(n => n.Content).HasColumnType("json");
 
         builder
             .HasOne<Folder>()

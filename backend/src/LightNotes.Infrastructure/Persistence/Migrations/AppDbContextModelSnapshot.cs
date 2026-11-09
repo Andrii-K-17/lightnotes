@@ -140,13 +140,17 @@ namespace LightNotes.Infrastructure.Persistence.Migrations
 
                     b.Property<string>("Content")
                         .IsRequired()
-                        .HasColumnType("jsonb")
+                        .HasColumnType("json")
                         .HasColumnName("content");
 
                     b.Property<string>("ContentText")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("content_text");
+
+                    b.Property<int>("ContentVersion")
+                        .HasColumnType("integer")
+                        .HasColumnName("content_version");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")

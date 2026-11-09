@@ -26,6 +26,12 @@ public sealed class Note : SyncEntity
     /// <summary>Client time of the last user edit.</summary>
     public DateTimeOffset EditedAt { get; private set; }
 
+    /// <summary>
+    /// The version at which title or content last changed.
+    /// Sync uses it to detect conflicting edits.
+    /// </summary>
+    public int ContentVersion { get; private set; }
+
     public List<Guid> TagIds { get; private set; } = [];
 
     private Note() { }
@@ -66,6 +72,11 @@ public sealed class Note : SyncEntity
         ContentText = contentText;
         EditedAt = editedAt.ToUniversalTime();
     }
+
+    /// <summary>
+    /// Call after SyncEntity.MarkChanged when the change touched the title or content.
+    /// </summary>
+    public void MarkContentChanged() => ContentVersion = Version;
 
     public void MoveTo(Guid? folderId)
     {
