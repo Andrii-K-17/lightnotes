@@ -59,6 +59,8 @@ public static class DependencyInjection
 
         services.AddSingleton<TokenService>();
 
+        services.AddScoped<ISyncTransactions, SyncTransactions>();
+
         return services;
     }
 
