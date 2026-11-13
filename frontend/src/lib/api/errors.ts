@@ -3,21 +3,32 @@ export class ApiError extends Error {
   readonly status: number
   readonly code: string
   readonly fieldErrors: Record<string, string[]>
+  readonly retryAfterSeconds: number | null
 
-  constructor(status: number, code: string, fieldErrors: Record<string, string[]> = {}) {
+  constructor(
+    status: number,
+    code: string,
+    fieldErrors: Record<string, string[]> = {},
+    retryAfterSeconds: number | null = null,
+  ) {
     super(code)
     this.name = 'ApiError'
     this.status = status
     this.code = code
     this.fieldErrors = fieldErrors
+    this.retryAfterSeconds = retryAfterSeconds
   }
 
   /** Builds an API error from an HTTP response body. */
-  static fromBody(status: number, body: unknown): ApiError {
+  static fromBody(
+    status: number,
+    body: unknown,
+    retryAfterSeconds: number | null = null,
+  ): ApiError {
     const problem = isRecord(body) ? body : {}
     const code = typeof problem.code === 'string' ? problem.code : `http.${status}`
 
-    return new ApiError(status, code, readFieldErrors(problem.errors))
+    return new ApiError(status, code, readFieldErrors(problem.errors), retryAfterSeconds)
   }
 
   /** The request never got a response. */

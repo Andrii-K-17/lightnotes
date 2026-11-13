@@ -18,7 +18,13 @@ export async function unwrap<TData>(request: Promise<Settled<TData>>): Promise<T
   }
 
   if (!settled.response.ok) {
-    throw ApiError.fromBody(settled.response.status, settled.error)
+    const retryAfter = Number.parseInt(settled.response.headers.get('Retry-After') ?? '', 10)
+
+    throw ApiError.fromBody(
+      settled.response.status,
+      settled.error,
+      Number.isFinite(retryAfter) ? retryAfter : null,
+    )
   }
 
   return settled.data as TData
