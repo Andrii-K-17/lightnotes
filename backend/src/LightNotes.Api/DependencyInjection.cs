@@ -25,8 +25,11 @@ public static class DependencyInjection
         services.AddScoped<ICurrentUser, CurrentUser>();
 
         services.ConfigureHttpJsonOptions(options =>
-            options.SerializerOptions.Converters.Add(new JsonStringEnumConverter())
-        );
+        {
+            options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
+            options.SerializerOptions.RespectNullableAnnotations = true;
+            options.SerializerOptions.RespectRequiredConstructorParameters = true;
+        });
 
         services.AddProblemDetails(options =>
             options.CustomizeProblemDetails = context =>
@@ -123,6 +126,7 @@ public static class DependencyInjection
         var v1 = app.MapGroup("/api/v1");
         v1.MapAuthEndpoints();
         v1.MapMeEndpoints();
+        v1.MapSyncEndpoints();
 
         if (app.Environment.IsDevelopment())
         {
@@ -138,8 +142,8 @@ public static class DependencyInjection
     {
         app.UseExceptionHandler();
         app.UseStatusCodePages();
-        app.UseRateLimiter();
         app.UseAuthentication();
+        app.UseRateLimiter();
         app.UseAuthorization();
 
         return app;

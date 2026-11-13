@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Security.Claims;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,6 +8,7 @@ namespace LightNotes.Api.Common;
 public static class RateLimitPolicies
 {
     public const string Auth = "auth";
+    public const string Sync = "sync";
 }
 
 internal static class RateLimitingExtensions
@@ -57,5 +59,21 @@ internal static class RateLimitingExtensions
                         }
                     );
             };
+
+            options.AddPolicy(
+                RateLimitPolicies.Sync,
+                http =>
+                    RateLimitPartition.GetFixedWindowLimiter(
+                        http.User.FindFirstValue("sub")
+                            ?? http.Connection.RemoteIpAddress?.ToString()
+                            ?? "unknown",
+                        _ => new FixedWindowRateLimiterOptions
+                        {
+                            PermitLimit = 60,
+                            Window = TimeSpan.FromMinutes(1),
+                            QueueLimit = 0,
+                        }
+                    )
+            );
         });
 }
