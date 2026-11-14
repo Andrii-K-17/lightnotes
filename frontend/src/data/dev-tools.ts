@@ -69,6 +69,8 @@ function makeNote(): NoteRecord {
     purgedAt: null,
     serverVersion: 0,
     syncStatus: 'dirty',
+    contentDirty: true,
+    metaDirty: true,
   }
 }
 

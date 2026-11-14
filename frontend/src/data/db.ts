@@ -4,9 +4,9 @@ import { tokenize } from '@/lib/search'
 /**
  * `dirty` means unsynced changes.
  * `conflict` means the server copy differs.
+ * `rejected` means the server refused the last push.
  */
-export type SyncStatus = 'clean' | 'dirty' | 'conflict'
-
+export type SyncStatus = 'clean' | 'dirty' | 'rejected'
 /** Tiptap document JSON. */
 export type RichText = Record<string, unknown>
 
@@ -31,6 +31,10 @@ export interface NoteRecord extends SyncFields {
   /** Last user edit time, used to keep list ordering stable after sync. */
   editedAt: number
   purgedAt: number | null
+  /** Title or content changed locally and not yet pushed. */
+  contentDirty: boolean
+  /** Folder, tags, pin or deletion changed locally and not yet pushed. */
+  metaDirty: boolean
   searchTokens: string[]
 }
 

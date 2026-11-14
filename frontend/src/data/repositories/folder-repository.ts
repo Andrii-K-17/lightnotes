@@ -56,7 +56,7 @@ async function remove(id: string): Promise<void> {
       .where('folderId')
       .equals(id)
       .filter((note) => note.deletedAt === null)
-      .modify({ deletedAt: now, syncStatus: 'dirty' })
+      .modify({ deletedAt: now, syncStatus: 'dirty', metaDirty: true })
     await db.folders.update(id, { deletedAt: now, syncStatus: 'dirty' })
   })
 }

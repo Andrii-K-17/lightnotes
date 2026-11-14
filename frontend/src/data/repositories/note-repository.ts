@@ -4,6 +4,11 @@ import { textCollator } from '@/lib/collator'
 import { displayTitle } from '@/lib/note-text'
 import { tokenize } from '@/lib/search'
 
+const META_CHANGED = {
+  syncStatus: 'dirty',
+  metaDirty: true,
+} as const
+
 export const EMPTY_DOC: RichText = {
   type: 'doc',
   content: [{ type: 'paragraph' }],
@@ -91,8 +96,10 @@ async function create(folderId: string | null = null): Promise<NoteRecord> {
     deletedAt: null,
     purgedAt: null,
     serverVersion: 0,
-    syncStatus: 'dirty',
+    ...META_CHANGED,
     searchTokens: [],
+    contentDirty: true,
+    metaDirty: true,
   }
 
   await getDb().notes.add(note)
@@ -185,7 +192,8 @@ async function save(id: string, { content, ...rest }: NoteEdit): Promise<void> {
       ...(content && { content: JSON.stringify(content) }),
       searchTokens: tokenize(title, contentText),
       editedAt: Date.now(),
-      syncStatus: 'dirty',
+      ...META_CHANGED,
+      contentDirty: true,
     })
   })
 }
@@ -202,14 +210,14 @@ async function discardIfEmpty(id: string): Promise<void> {
 async function setPinned(id: string, pinned: boolean): Promise<void> {
   await getDb().notes.update(id, {
     pinned,
-    syncStatus: 'dirty',
+    ...META_CHANGED,
   })
 }
 
 async function moveToTrash(id: string): Promise<void> {
   await getDb().notes.update(id, {
     deletedAt: Date.now(),
-    syncStatus: 'dirty',
+    ...META_CHANGED,
   })
 }
 
@@ -233,7 +241,7 @@ async function restore(id: string): Promise<void> {
     await db.notes.update(id, {
       deletedAt: null,
       folderId: folderExists ? note.folderId : null,
-      syncStatus: 'dirty',
+      ...META_CHANGED,
     })
   })
 }
@@ -260,7 +268,8 @@ async function purge(id: string): Promise<void> {
     pinned: false,
     tagIds: [],
     folderId: null,
-    syncStatus: 'dirty',
+    ...META_CHANGED,
+    contentDirty: false,
   })
 }
 
@@ -277,7 +286,7 @@ async function emptyTrash(): Promise<void> {
 async function moveTo(id: string, folderId: string | null): Promise<void> {
   await getDb().notes.update(id, {
     folderId,
-    syncStatus: 'dirty',
+    ...META_CHANGED,
   })
 }
 
@@ -293,7 +302,7 @@ async function addTag(id: string, tagId: string): Promise<void> {
 
     await db.notes.update(id, {
       tagIds: [...note.tagIds, tagId],
-      syncStatus: 'dirty',
+      ...META_CHANGED,
     })
   })
 }
@@ -307,7 +316,7 @@ async function removeTag(id: string, tagId: string): Promise<void> {
     if (note) {
       await db.notes.update(id, {
         tagIds: note.tagIds.filter((t) => t !== tagId),
-        syncStatus: 'dirty',
+        ...META_CHANGED,
       })
     }
   })

@@ -88,6 +88,7 @@ async function remove(id: string): Promise<void> {
       .modify((note) => {
         note.tagIds = note.tagIds.filter((tagId) => tagId !== id)
         note.syncStatus = 'dirty'
+        note.metaDirty = true
       })
     await db.tags.update(id, {
       deletedAt: Date.now(),
