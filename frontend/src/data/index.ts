@@ -22,3 +22,4 @@ export {
 } from './repositories/note-repository'
 export { FOLDER_NAME_MAX_LENGTH, folderRepository } from './repositories/folder-repository'
 export { TAG_NAME_MAX_LENGTH, tagRepository } from './repositories/tag-repository'
+export { getSyncCursor, pendingChanges, syncOnce, type SyncReport } from './sync'
