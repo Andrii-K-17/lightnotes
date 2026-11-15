@@ -6,6 +6,7 @@ import { isSameScope, useNotesView } from '../stores/view'
 import SidebarItem from './SidebarItem.vue'
 import FolderList from './FolderList.vue'
 import TagList from './TagList.vue'
+import { SyncIndicator } from '@/modules/sync'
 
 const emit = defineEmits<{ navigate: [] }>()
 const view = useNotesView()
@@ -56,6 +57,8 @@ function select(scope: NoteScope): void {
     <TagList />
 
     <div class="mt-auto pt-3">
+      <SyncIndicator class="px-3 pb-3" />
+
       <SidebarItem :to="{ name: 'settings' }">
         <template #icon>
           <Settings class="size-4" />

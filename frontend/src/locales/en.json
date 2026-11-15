@@ -170,5 +170,14 @@
   "view": {
     "grid": "Grid view",
     "list": "List view"
+  },
+  "sync": {
+    "synced": "Synced",
+    "syncing": "Syncing…",
+    "offline": "Offline",
+    "error": "Sync error",
+    "retry": "Retry",
+    "waiting": "{count} change waiting | {count} changes waiting",
+    "initial": "Syncing your notes… {count}"
   }
 }

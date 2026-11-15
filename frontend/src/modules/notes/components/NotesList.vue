@@ -1,5 +1,15 @@
 <script setup lang="ts">
-import { ArrowDownUp, FileText, LayoutGrid, List, Menu, Plus, Search, X } from '@lucide/vue'
+import {
+  ArrowDownUp,
+  FileText,
+  LayoutGrid,
+  List,
+  Menu,
+  Plus,
+  Search,
+  X,
+  LoaderCircle,
+} from '@lucide/vue'
 import { refDebounced, useEventListener } from '@vueuse/core'
 import { computed, ref, toRef, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -29,12 +39,14 @@ import { useNotesView } from '../stores/view'
 import NoteCard from './NoteCard.vue'
 import NotesSidebar from './NotesSidebar.vue'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
+import { SyncIndicator, useSyncStore } from '@/modules/sync'
 
 const { t } = useI18n()
 const view = useNotesView()
 const folders = useFolders()
 const tags = useTags()
 const { createNote } = useNewNote()
+const sync = useSyncStore()
 
 const drawerOpen = ref(false)
 const confirmEmpty = ref(false)
@@ -102,6 +114,11 @@ useEventListener(window, 'keydown', (event) => {
       <h1 class="min-w-0 flex-1 truncate text-2xl font-semibold tracking-tight">
         {{ title }}
       </h1>
+
+      <SyncIndicator
+        compact
+        class="mr-1"
+      />
 
       <Button
         variant="ghost"
@@ -238,6 +255,16 @@ useEventListener(window, 'keydown', (event) => {
           :key="n"
           class="h-36 animate-pulse rounded-2xl bg-muted"
         />
+      </div>
+
+      <div
+        v-else-if="notes.length === 0 && sync.initialSyncing"
+        class="flex flex-col items-center gap-3 py-20 text-center text-muted-foreground"
+      >
+        <LoaderCircle class="size-8 animate-spin" />
+        <p>
+          {{ $t('sync.initial', { count: sync.received }) }}
+        </p>
       </div>
 
       <div
