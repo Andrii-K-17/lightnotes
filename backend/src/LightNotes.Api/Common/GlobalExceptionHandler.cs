@@ -19,9 +19,15 @@ internal sealed class GlobalExceptionHandler(
         CancellationToken cancellationToken
     )
     {
-        var (status, code) = exception is DomainException domain
-            ? (StatusCodes.Status400BadRequest, domain.Code)
-            : (StatusCodes.Status500InternalServerError, "internal_error");
+        var (status, code) = exception switch
+        {
+            DomainException domain => (StatusCodes.Status400BadRequest, domain.Code),
+            BadHttpRequestException badRequest => (
+                badRequest.StatusCode,
+                "validation.invalid_body"
+            ),
+            _ => (StatusCodes.Status500InternalServerError, "internal_error"),
+        };
 
         if (status >= StatusCodes.Status500InternalServerError)
         {
