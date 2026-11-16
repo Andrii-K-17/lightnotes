@@ -7,6 +7,7 @@ export { getSyncCursor }
 export interface SyncReport {
   pushed: number
   rejected: number
+  conflicts: number
   pulled: number
 }
 
@@ -18,6 +19,7 @@ export async function syncOnce(onProgress?: (received: number) => void): Promise
   return {
     pushed: push.sent,
     rejected: push.rejected,
+    conflicts: push.conflicts,
     pulled,
   }
 }

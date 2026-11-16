@@ -25,8 +25,8 @@ export function parseContent(content: string): RichText {
   }
 }
 
-/** Edits coming from the editor. */
-export type NoteEdit = Partial<Pick<NoteRecord, 'title' | 'contentText'>> & { content?: RichText }
+/** Title, content a JSON string and text as stored. */
+export type NoteEdit = Partial<Pick<NoteRecord, 'title' | 'content' | 'contentText'>>
 
 export type NoteScope =
   | { kind: 'all' }
@@ -100,6 +100,7 @@ async function create(folderId: string | null = null): Promise<NoteRecord> {
     searchTokens: [],
     contentDirty: true,
     metaDirty: true,
+    contentBaseVersion: null,
   }
 
   await getDb().notes.add(note)
@@ -173,9 +174,16 @@ async function query({ scope, tagIds, text, sort }: NoteQuery): Promise<NoteReco
   return notes.sort(comparator(scope, sort))
 }
 
-/** Saves a user edit, refreshes the search index and marks the note for sync. */
-async function save(id: string, { content, ...rest }: NoteEdit): Promise<void> {
+/**
+ * Saves a user edit, refreshes the search index and marks the note for sync.
+ * `baseVersion` is the server version the editor's text derives from.
+ */
+async function save(id: string, changes: NoteEdit, baseVersion = 0): Promise<void> {
   const db = getDb()
+
+  const patch = Object.fromEntries(
+    Object.entries(changes).filter(([, value]) => value !== undefined),
+  )
 
   await db.transaction('rw', db.notes, async () => {
     const note = await db.notes.get(id)
@@ -184,16 +192,16 @@ async function save(id: string, { content, ...rest }: NoteEdit): Promise<void> {
       return
     }
 
-    const title = rest.title ?? note.title
-    const contentText = rest.contentText ?? note.contentText
+    const title = changes.title ?? note.title
+    const contentText = changes.contentText ?? note.contentText
 
     await db.notes.update(id, {
-      ...rest,
-      ...(content && { content: JSON.stringify(content) }),
+      ...patch,
       searchTokens: tokenize(title, contentText),
       editedAt: Date.now(),
-      ...META_CHANGED,
+      syncStatus: 'dirty',
       contentDirty: true,
+      contentBaseVersion: note.contentDirty ? (note.contentBaseVersion ?? null) : baseVersion,
     })
   })
 }

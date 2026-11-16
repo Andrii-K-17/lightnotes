@@ -18,6 +18,13 @@ export function useSyncScheduler(): void {
   // Retry as soon as the browser reconnects.
   useEventListener(window, 'online', () => void sync.run())
 
+  // Two windows on one screen never fire visibilitychange.
+  useEventListener(window, 'focus', () => {
+    if (sync.state !== 'error') {
+      void sync.run()
+    }
+  })
+
   // Sync when returning to the tab, unless an error retry is pending.
   useEventListener(document, 'visibilitychange', () => {
     if (document.visibilityState === 'visible' && sync.state !== 'error') {

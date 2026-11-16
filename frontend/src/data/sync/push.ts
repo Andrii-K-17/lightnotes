@@ -15,6 +15,7 @@ interface Batch {
 export interface PushSummary {
   sent: number
   rejected: number
+  conflicts: number
 }
 
 /** Indexes entities by their ID. */
@@ -77,6 +78,7 @@ export async function pushAll(): Promise<PushSummary> {
   const summary: PushSummary = {
     sent: 0,
     rejected: 0,
+    conflicts: 0,
   }
 
   for (let batchNumber = 0; batchNumber < MAX_BATCHES_PER_CYCLE; batchNumber++) {
@@ -92,7 +94,7 @@ export async function pushAll(): Promise<PushSummary> {
       tags: batch.tags.map(tagChange),
       notes: batch.notes.map(noteChange),
     })
-    const { handled, rejected } = await applyResults(batch, response)
+    const { handled, rejected, conflicts } = await applyResults(batch, response)
 
     if (handled === 0) {
       throw new Error('The server answered without a result for any pushed change.')
@@ -100,6 +102,7 @@ export async function pushAll(): Promise<PushSummary> {
 
     summary.sent += count
     summary.rejected += rejected
+    summary.conflicts += conflicts
   }
 
   return summary
@@ -112,6 +115,7 @@ async function applyResults(
 ): Promise<{
   handled: number
   rejected: number
+  conflicts: number
 }> {
   const db = getDb()
   const folders = byId(batch.folders)
@@ -119,6 +123,7 @@ async function applyResults(
   const notes = byId(batch.notes)
   let handled = 0
   let rejected = 0
+  let conflicts = 0
 
   await db.transaction('rw', db.folders, db.tags, db.notes, async () => {
     for (const result of response.folders) {
@@ -190,6 +195,7 @@ async function applyResults(
       if (result.status === 'Applied') {
         await markNoteApplied(db, local, sent, Number(result.version))
       } else if (result.status === 'Conflict' && result.current) {
+        conflicts++
         await resolveNoteConflict(db, local, sent, result.current)
       } else {
         rejected++
@@ -204,6 +210,7 @@ async function applyResults(
   return {
     handled,
     rejected,
+    conflicts,
   }
 }
 
@@ -247,11 +254,17 @@ async function markNoteApplied(
     serverVersion: version,
     contentDirty,
     metaDirty,
+    contentBaseVersion: contentDirty ? version : null,
     syncStatus: contentDirty || metaDirty ? 'dirty' : 'clean',
   })
 }
 
-/** Resolves a server conflict while preserving any newer local edits. */
+/**
+ * Resolves a server conflict for a note.
+ * - If the local note hasn't changed since it was sent, accepts the server version (`current`).
+ * - If the user edited the note again while the request was in flight, leaves it
+ *   marked as 'dirty' with its old base version to be synced in the next cycle.
+ */
 async function resolveNoteConflict(
   db: LightNotesDb,
   local: NoteRecord,
@@ -262,11 +275,4 @@ async function resolveNoteConflict(
     await db.notes.put(noteRecord(current))
     return
   }
-
-  await db.notes.update(local.id, {
-    serverVersion: Number(current.version),
-    contentDirty: true,
-    metaDirty: true,
-    syncStatus: 'dirty',
-  })
 }

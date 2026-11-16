@@ -35,6 +35,8 @@ export interface NoteRecord extends SyncFields {
   contentDirty: boolean
   /** Folder, tags, pin or deletion changed locally and not yet pushed. */
   metaDirty: boolean
+  /** Server version that the unsynced title/content edits are based on. */
+  contentBaseVersion: number | null
   searchTokens: string[]
 }
 

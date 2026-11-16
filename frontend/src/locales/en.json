@@ -179,6 +179,7 @@
     "error": "Sync error",
     "retry": "Retry",
     "waiting": "{count} change waiting | {count} changes waiting",
-    "initial": "Syncing your notes… {count}"
+    "initial": "Syncing your notes… {count}",
+    "conflict": "A conflicting edit was kept as a separate note."
   }
 }

@@ -71,6 +71,7 @@ function makeNote(): NoteRecord {
     syncStatus: 'dirty',
     contentDirty: true,
     metaDirty: true,
+    contentBaseVersion: null,
   }
 }
 

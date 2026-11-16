@@ -2,6 +2,8 @@ import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import { getSyncCursor, pendingChanges, syncOnce } from '@/data'
 import { ApiError } from '@/lib/api'
+import { toast } from 'vue-sonner'
+import { i18n } from '@/i18n'
 
 type State = 'idle' | 'syncing' | 'offline' | 'error'
 
@@ -44,11 +46,15 @@ export const useSyncStore = defineStore('sync', () => {
     received.value = 0
 
     try {
-      await navigator.locks.request('ln-sync', () =>
+      const report = await navigator.locks.request('ln-sync', () =>
         syncOnce((count) => {
           received.value = count
         }),
       )
+
+      if (report.conflicts > 0) {
+        toast(i18n.global.t('sync.conflict'))
+      }
 
       failures = 0
       errorCode.value = null

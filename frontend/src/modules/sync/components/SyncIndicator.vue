@@ -26,7 +26,7 @@ const { data: pending } = useLiveQuery(pendingChanges)
 
     <template v-else-if="sync.state === 'offline'">
       <CloudOff class="size-4" />
-      
+
       <span :class="{ 'sr-only': compact }">
         {{ $t('sync.offline') }}
 

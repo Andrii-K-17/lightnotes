@@ -39,7 +39,7 @@ export function noteChange(note: NoteRecord): Schemas['NoteChange'] {
 
   return {
     id: note.id,
-    baseVersion: note.serverVersion,
+    baseVersion: note.contentBaseVersion ?? note.serverVersion,
     createdAt: toIso(note.createdAt),
     content:
       isNew || note.contentDirty
@@ -106,6 +106,7 @@ export function noteRecord(dto: NoteDto): NoteRecord {
     serverVersion: Number(dto.version),
     syncStatus: 'clean',
     contentDirty: false,
+    contentBaseVersion: null,
     metaDirty: false,
   }
 }

@@ -3,6 +3,7 @@ import { EditorContent, useEditor, type JSONContent } from '@tiptap/vue-3'
 import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { RichText } from '@/data'
+import type { EditorChanges } from '../composables/useAutosave'
 import EditorToolbar from './EditorToolbar.vue'
 import { createExtensions } from './extensions'
 import './editor.css'
@@ -16,15 +17,26 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  change: [changes: { title?: string; content?: RichText; contentText?: string }]
+  change: [changes: EditorChanges]
   blur: []
 }>()
 
 const { t } = useI18n()
 
 const title = ref(props.title)
-watch(title, (value) => emit('change', { title: value }))
+let applyingRemote = false
 
+watch(
+  title,
+  (value) => {
+    if (!applyingRemote) {
+      emit('change', { title: value })
+    }
+  },
+  { flush: 'sync' },
+)
+
+/** Creates the rich-text editor and reports document edits to the parent. */
 const editor = useEditor({
   content: props.content as JSONContent,
   extensions: createExtensions(t('editor.placeholder')),
@@ -41,6 +53,29 @@ const editor = useEditor({
     }),
   onBlur: () => emit('blur'),
 })
+
+/** Replaces title and document with a newer version from elsewhere, keeping the caret in place. */
+function applyRemote(remoteTitle: string, document: RichText): void {
+  const instance = editor.value
+
+  if (!instance) {
+    return
+  }
+
+  applyingRemote = true
+  title.value = remoteTitle
+  applyingRemote = false
+
+  const { from } = instance.state.selection
+
+  instance.commands.setContent(document as JSONContent, { emitUpdate: false })
+
+  if (instance.isFocused) {
+    instance.commands.setTextSelection(from)
+  }
+}
+
+defineExpose({ applyRemote })
 </script>
 
 <template>
