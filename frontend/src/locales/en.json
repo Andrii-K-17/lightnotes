@@ -29,7 +29,8 @@
     "network_error": "Can't reach the server. Check your connection.",
     "rate_limited": "Too many requests. Please wait a moment.",
     "validation": {
-      "failed": "Please check the entered data."
+      "failed": "Please check the entered data.",
+      "invalid_body": "The request could not be read. Please try again."
     },
     "auth": {
       "invalid_credentials": "Incorrect email or password.",
