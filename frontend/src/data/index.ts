@@ -1,6 +1,7 @@
 export {
   closeDatabase,
   openDatabase,
+  wipeDatabase,
   type AttachmentRecord,
   type FolderRecord,
   type NoteRecord,

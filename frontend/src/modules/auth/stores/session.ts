@@ -1,6 +1,6 @@
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
-import { closeDatabase, openDatabase } from '@/data'
+import { closeDatabase, openDatabase, wipeDatabase } from '@/data'
 import { ApiError, type RefreshResult } from '@/lib/api'
 import { authApi } from '../api'
 import { clearCachedProfile, readCachedProfile, writeCachedProfile } from '../profile-cache'
@@ -45,7 +45,9 @@ export const useSessionStore = defineStore('session', () => {
     await login(email, password)
   }
 
-  async function logout(): Promise<void> {
+  async function logout(options: { wipe?: boolean } = {}): Promise<void> {
+    const userId = profile.value?.id
+
     try {
       await authApi.logout()
     } catch (error) {
@@ -55,6 +57,10 @@ export const useSessionStore = defineStore('session', () => {
     }
 
     clear()
+
+    if (options.wipe && userId) {
+      await wipeDatabase(userId)
+    }
   }
 
   function clear(): void {

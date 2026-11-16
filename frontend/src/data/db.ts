@@ -122,6 +122,15 @@ export function closeDatabase(): void {
   current = undefined
 }
 
+/** Deletes the local database of a user. */
+export async function wipeDatabase(userId: string): Promise<void> {
+  if (current?.name === databaseName(userId)) {
+    closeDatabase()
+  }
+
+  await Dexie.delete(databaseName(userId))
+}
+
 /** Returns the open database for repository use. */
 export function getDb(): LightNotesDb {
   if (!current) {

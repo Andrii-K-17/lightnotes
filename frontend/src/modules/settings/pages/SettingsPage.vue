@@ -6,20 +6,28 @@ import { useSessionStore } from '@/modules/auth'
 import { ref } from 'vue'
 import { errorMessage } from '@/i18n/errors'
 import { ApiError } from '@/lib/api'
+import SignOutDialog from '../components/SignOutDialog.vue'
+import { useSyncStore } from '@/modules/sync'
 
 const router = useRouter()
 const session = useSessionStore()
 const theme = useTheme()
+const sync = useSyncStore()
+const signOutOpen = ref(false)
 
 const themes = ['auto', 'light', 'dark'] as const
 
 const signOutError = ref<string | null>(null)
 
-async function signOut(): Promise<void> {
+async function signOut(wipe: boolean): Promise<void> {
   signOutError.value = null
 
   try {
-    await session.logout()
+    if (wipe) {
+      await sync.run()
+    }
+
+    await session.logout({ wipe })
   } catch (error) {
     signOutError.value = errorMessage(error instanceof ApiError ? error.code : 'unknown')
     return
@@ -32,7 +40,9 @@ async function signOut(): Promise<void> {
 <template>
   <div class="mx-auto grid max-w-3xl gap-8 p-4">
     <div class="flex items-center justify-between">
-      <h1 class="text-2xl font-semibold">{{ $t('settings.title') }}</h1>
+      <h1 class="text-2xl font-semibold">
+        {{ $t('settings.title') }}
+      </h1>
       <RouterLink
         class="text-sm underline"
         :to="{ name: 'home' }"
@@ -42,7 +52,9 @@ async function signOut(): Promise<void> {
     </div>
 
     <section class="grid gap-3">
-      <h2 class="text-lg font-medium">{{ $t('settings.appearance') }}</h2>
+      <h2 class="text-lg font-medium">
+        {{ $t('settings.appearance') }}
+      </h2>
       <div class="flex gap-2">
         <Button
           v-for="mode in themes"
@@ -57,15 +69,25 @@ async function signOut(): Promise<void> {
     </section>
 
     <section class="grid gap-3">
-      <h2 class="text-lg font-medium">{{ $t('settings.account') }}</h2>
-      <p class="text-sm text-muted-foreground">{{ session.profile?.email }}</p>
+      <h2 class="text-lg font-medium">
+        {{ $t('settings.account') }}
+      </h2>
+      <p class="text-sm text-muted-foreground">
+        {{ session.profile?.email }}
+      </p>
       <Button
         class="w-fit"
         variant="outline"
-        @click="signOut"
+        @click="signOutOpen = true"
       >
         {{ $t('settings.signOut') }}
       </Button>
+
+      <SignOutDialog
+        v-model:open="signOutOpen"
+        @confirm="signOut"
+      />
+
       <p
         v-if="signOutError"
         role="alert"

@@ -154,7 +154,11 @@
       "dark": "Dark"
     },
     "account": "Account",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "signOutTitle": "Sign out?",
+    "signOutDescription": "You can sign in again at any time.",
+    "wipe": "Remove my notes from this device",
+    "unsynced": "{count} change has not been synced yet and will be lost. | {count} changes have not been synced yet and will be lost."
   },
   "search": {
     "placeholder": "Search notes",
