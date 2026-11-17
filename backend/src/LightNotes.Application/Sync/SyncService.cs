@@ -9,6 +9,7 @@ internal sealed class SyncService(
     IAppDbContext db,
     ICurrentUser currentUser,
     ISyncTransactions transactions,
+    IBlobStorage blobs,
     TimeProvider timeProvider
 ) : ISyncService
 {
@@ -61,7 +62,33 @@ internal sealed class SyncService(
 
         var notes = await NoteSync.ApplyAsync(context, request.Notes, cancellationToken);
 
+        var purged = request
+            .Notes.Where(c => c.Meta?.PurgedAt is not null)
+            .Select(c => c.Id)
+            .ToList();
+        var orphanKeys = new List<string>();
+
+        if (purged.Count > 0)
+        {
+            orphanKeys = await db
+                .Attachments.Where(a => purged.Contains(a.NoteId))
+                .Select(a => a.StorageKey)
+                .ToListAsync(cancellationToken);
+            await db
+                .Attachments.Where(a => purged.Contains(a.NoteId))
+                .ExecuteDeleteAsync(cancellationToken);
+        }
+
         await transaction.CommitAsync(cancellationToken);
+
+        foreach (var key in orphanKeys)
+        {
+            try
+            {
+                await blobs.DeleteAsync(key, cancellationToken);
+            }
+            catch (IOException) { }
+        }
 
         return new PushResponse(folders, tags, notes);
     }
