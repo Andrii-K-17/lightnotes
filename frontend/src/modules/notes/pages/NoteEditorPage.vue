@@ -128,6 +128,7 @@ onBeforeUnmount(() => void leave(props.id))
       :autofocus="note.title === '' && note.contentText === ''"
       @change="(changes) => schedule(note!.id, changes, baseVersion)"
       @blur="flush"
+      :note-id="note.id"
     >
       <template #meta>
         <NoteTags

@@ -17,6 +17,7 @@ import {
   List,
   ListChecks,
   ListOrdered,
+  ImagePlus,
 } from '@lucide/vue'
 import type { Editor } from '@tiptap/vue-3'
 import { nextTick, ref, useTemplateRef, type Component } from 'vue'
@@ -26,6 +27,7 @@ import { listDepth, MAX_LIST_DEPTH } from './list-depth'
 import { useKeyboardInset } from '@/lib/keyboard-inset'
 
 const props = defineProps<{ editor: Editor }>()
+const emit = defineEmits<{ images: [files: File[]] }>()
 
 interface Action {
   id: string
@@ -201,6 +203,18 @@ function removeLink(): void {
   chain().extendMarkRange('link').unsetLink().run()
   linkOpen.value = false
 }
+
+const fileInput = useTemplateRef<HTMLInputElement>('fileInput')
+
+function onPicked(event: Event): void {
+  const input = event.target as HTMLInputElement
+
+  if (input.files?.length) {
+    emit('images', [...input.files])
+  }
+
+  input.value = ''
+}
 </script>
 
 <template>
@@ -292,6 +306,26 @@ function removeLink(): void {
         @click="openLink"
       >
         <LinkIcon class="size-4" />
+      </Button>
+
+      <input
+        ref="fileInput"
+        type="file"
+        accept="image/*"
+        multiple
+        class="hidden"
+        @change="onPicked"
+      />
+      <Button
+        type="button"
+        size="icon"
+        variant="ghost"
+        :aria-label="$t('editor.image')"
+        :title="$t('editor.image')"
+        @mousedown.prevent
+        @click="fileInput?.click()"
+      >
+        <ImagePlus class="size-4" />
       </Button>
     </div>
   </div>

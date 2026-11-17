@@ -142,7 +142,12 @@
     "taskList": "Checklist",
     "indent": "Increase indent",
     "outdent": "Decrease indent",
-    "titlePlaceholder": "Title"
+    "titlePlaceholder": "Title",
+    "image": "Insert image",
+    "imageLoading": "Loading image…",
+    "imageUnavailable": "Image not available yet",
+    "imageFailed": "The image could not be added.",
+    "imageTooLarge": "The image is too large (up to 10 MB)."
   },
   "settings": {
     "title": "Settings",
