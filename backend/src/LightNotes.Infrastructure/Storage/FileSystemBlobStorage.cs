@@ -1,11 +1,18 @@
 using LightNotes.Application.Abstractions;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 
 namespace LightNotes.Infrastructure.Storage;
 
-internal sealed class FileSystemBlobStorage(IOptions<StorageOptions> options) : IBlobStorage
+internal sealed class FileSystemBlobStorage(
+    IOptions<StorageOptions> options,
+    IHostEnvironment environment
+) : IBlobStorage
 {
-    private readonly string _root = Path.GetFullPath(options.Value.Path);
+    private readonly string _root = Path.GetFullPath(
+        options.Value.Path,
+        environment.ContentRootPath
+    );
 
     public async Task SaveAsync(string key, Stream content, CancellationToken cancellationToken)
     {
