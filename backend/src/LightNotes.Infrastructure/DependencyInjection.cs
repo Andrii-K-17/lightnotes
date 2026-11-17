@@ -2,6 +2,7 @@ using LightNotes.Application.Abstractions;
 using LightNotes.Application.Auth;
 using LightNotes.Infrastructure.Identity;
 using LightNotes.Infrastructure.Persistence;
+using LightNotes.Infrastructure.Storage;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -60,6 +61,14 @@ public static class DependencyInjection
         services.AddSingleton<TokenService>();
 
         services.AddScoped<ISyncTransactions, SyncTransactions>();
+
+        services
+            .AddOptions<StorageOptions>()
+            .BindConfiguration(StorageOptions.SectionName)
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        services.AddSingleton<IBlobStorage, FileSystemBlobStorage>();
 
         return services;
     }
