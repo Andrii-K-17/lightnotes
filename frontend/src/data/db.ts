@@ -61,7 +61,7 @@ export interface AttachmentRecord {
   contentType: string
   size: number
   blob: Blob | null
-  uploadState: 'pending' | 'uploaded'
+  uploadState: 'pending' | 'uploaded' | 'failed'
 }
 
 export interface MetaRecord {

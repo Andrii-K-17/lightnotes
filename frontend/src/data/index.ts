@@ -24,3 +24,5 @@ export {
 export { FOLDER_NAME_MAX_LENGTH, folderRepository } from './repositories/folder-repository'
 export { TAG_NAME_MAX_LENGTH, tagRepository } from './repositories/tag-repository'
 export { getSyncCursor, pendingChanges, syncOnce, type SyncReport } from './sync'
+export { downloadAttachment } from './sync/attachments'
+export { attachmentRepository } from './repositories/attachment-repository'

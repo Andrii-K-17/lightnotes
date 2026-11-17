@@ -32,7 +32,7 @@ function attachToken(request: Request): void {
  * Adds the access token.
  * On 401 renews it once and replays the request.
  */
-async function authFetch(request: Request): Promise<Response> {
+export async function authFetch(request: Request): Promise<Response> {
   if (!hooks || new URL(request.url).pathname.startsWith(AUTH_PATH)) {
     return fetch(request)
   }

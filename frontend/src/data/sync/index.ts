@@ -1,6 +1,7 @@
 import { getDb } from '../db'
 import { pullAll, getSyncCursor } from './pull'
 import { pushAll } from './push'
+import { uploadPending } from './attachments'
 
 export { getSyncCursor }
 
@@ -14,6 +15,7 @@ export interface SyncReport {
 /** One sync cycle: push local changes, then pull everything new. */
 export async function syncOnce(onProgress?: (received: number) => void): Promise<SyncReport> {
   const push = await pushAll()
+  await uploadPending()
   const pulled = await pullAll(onProgress)
 
   return {

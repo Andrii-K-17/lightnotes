@@ -49,7 +49,7 @@ export async function pullAll(onProgress?: (received: number) => void): Promise<
 async function applyPage(page: PullResponse): Promise<void> {
   const db = getDb()
 
-  await db.transaction('rw', db.folders, db.tags, db.notes, db.meta, async () => {
+  await db.transaction('rw', db.folders, db.tags, db.notes, db.attachments, db.meta, async () => {
     for (const dto of page.folders) {
       await merge<FolderRecord>(
         db.folders,
@@ -70,11 +70,15 @@ async function applyPage(page: PullResponse): Promise<void> {
       await merge<NoteRecord>(db.notes, dto.id, Number(dto.version), Boolean(dto.purgedAt), () =>
         noteRecord(dto),
       )
+
+      if (dto.purgedAt) {
+        await db.attachments.where('noteId').equals(dto.id).delete()
+      }
     }
 
     await db.meta.put({
       key: CURSOR_KEY,
-      value: Number(page.nextSeq),
+      value: page.nextSeq,
     })
   })
 }

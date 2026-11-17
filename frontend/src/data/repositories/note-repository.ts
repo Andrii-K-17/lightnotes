@@ -263,21 +263,26 @@ async function purge(id: string): Promise<void> {
     return
   }
 
-  if (note.serverVersion === 0) {
-    await db.notes.delete(id)
-    return
-  }
+  await db.transaction('rw', db.notes, db.attachments, async () => {
+    await db.attachments.where('noteId').equals(id).delete()
 
-  await db.notes.update(id, {
-    purgedAt: Date.now(),
-    title: '',
-    content: EMPTY_CONTENT,
-    contentText: '',
-    pinned: false,
-    tagIds: [],
-    folderId: null,
-    ...META_CHANGED,
-    contentDirty: false,
+    if (note.serverVersion === 0) {
+      await db.notes.delete(id)
+      return
+    }
+
+    await db.notes.update(id, {
+      purgedAt: Date.now(),
+      title: '',
+      content: EMPTY_CONTENT,
+      contentText: '',
+      searchTokens: [],
+      pinned: false,
+      tagIds: [],
+      folderId: null,
+      ...META_CHANGED,
+      contentDirty: false,
+    })
   })
 }
 
