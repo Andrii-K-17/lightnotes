@@ -165,6 +165,27 @@ internal sealed class AuthService(
         return new UserProfile(user.Id, user.Email!, user.AiConsentAt is not null);
     }
 
+    public async Task<Result> SetAiConsentAsync(bool granted, CancellationToken cancellationToken)
+    {
+        var user = await userManager.FindByIdAsync(currentUser.UserId.ToString());
+
+        if (user is null)
+        {
+            return Error.Unauthorized("auth.invalid_token");
+        }
+
+        user.AiConsentAt = granted ? timeProvider.GetUtcNow() : null;
+
+        var result = await userManager.UpdateAsync(user);
+
+        if (!result.Succeeded)
+        {
+            return Error.Conflict("auth.update_failed");
+        }
+
+        return Result.Success;
+    }
+
     public async Task<Result<AuthSession>> SignInWithGoogleAsync(
         GoogleIdentity identity,
         CancellationToken cancellationToken

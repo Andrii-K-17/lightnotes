@@ -31,4 +31,9 @@ public interface IAuthService
         GoogleIdentity identity,
         CancellationToken cancellationToken
     );
+
+    /// <summary>
+    /// Records or withdraws the user's consent to send note text to the AI provider.
+    /// </summary>
+    Task<Result> SetAiConsentAsync(bool granted, CancellationToken cancellationToken);
 }
