@@ -1,12 +1,14 @@
 import { ApiError, authFetch } from '@/lib/api'
 
-export type AiAction = 'improve' | 'summarize' | 'translate'
+export type AiAction = 'improve' | 'summarize' | 'translate' | 'custom'
 
 export interface AiRequest {
   action: AiAction
   text: string
   /** Target language of a translation. */
   language?: string
+  /** The user's own prompt for the "custom" action. */
+  instruction?: string
 }
 
 /** One server-sent event: lines `event: name` and `data: ...`. */

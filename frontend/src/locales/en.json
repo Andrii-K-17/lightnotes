@@ -224,6 +224,8 @@
     "retry": "Retry",
     "stop": "Stop",
     "nothing": "There is no text to work with.",
-    "offline": "AI needs an internet connection."
+    "offline": "AI needs an internet connection.",
+    "promptPlaceholder": "Ask AI to do something with the text…",
+    "send": "Send"
   }
 }

@@ -15,6 +15,8 @@ import { errorMessage } from '@/i18n/errors'
 import { ApiError } from '@/lib/api'
 import { useSessionStore } from '@/modules/auth'
 import { runAiAction, type AiAction } from '../lib/stream'
+import { ArrowBigUpIcon } from '@lucide/vue'
+import { Input } from '@/components/ui/input'
 
 const props = defineProps<{
   /** The text to work on: the selection, or the whole note when nothing is selected. */
@@ -35,6 +37,8 @@ const side = computed(() => (useMediaQuery('(min-width: 640px)').value ? 'right'
 const LANGUAGES = ['English', 'Ukrainian', 'Polish', 'German'] as const
 const language = ref<(typeof LANGUAGES)[number]>('English')
 
+const prompt = ref('')
+
 const result = ref('')
 const running = ref(false)
 const error = ref<string | null>(null)
@@ -49,7 +53,7 @@ async function run(action: AiAction): Promise<void> {
   result.value = ''
   error.value = null
 
-  if (!input.text.trim()) {
+  if (action !== 'custom' && !input.text.trim()) {
     error.value = t('ai.nothing')
     return
   }
@@ -63,7 +67,12 @@ async function run(action: AiAction): Promise<void> {
 
   try {
     await runAiAction(
-      { action, text: input.text, language: action === 'translate' ? language.value : undefined },
+      {
+        action,
+        text: input.text,
+        language: action === 'translate' ? language.value : undefined,
+        instruction: action === 'custom' ? prompt.value.trim() : undefined,
+      },
       (delta) => {
         result.value += delta
       },
@@ -184,6 +193,27 @@ watch(open, (value) => {
             {{ $t('ai.translate') }}
           </Button>
         </div>
+
+        <form
+          class="flex items-center gap-2"
+          @submit.prevent="run('custom')"
+        >
+          <Input
+            v-model="prompt"
+            maxlength="1000"
+            :placeholder="$t('ai.promptPlaceholder')"
+            :aria-label="$t('ai.promptPlaceholder')"
+          />
+          <Button
+            type="submit"
+            size="icon"
+            :disabled="running || !online || !prompt.trim()"
+            :aria-label="$t('ai.send')"
+            class="cursor-pointer"
+          >
+            <ArrowBigUpIcon class="size-4" />
+          </Button>
+        </form>
 
         <div
           v-if="result || running"
