@@ -1,6 +1,8 @@
 namespace LightNotes.Application.Common;
 
-/// <summary>Outcome of a use case without a value.</summary>
+/// <summary>
+/// Outcome of a use case without a value.
+/// </summary>
 public class Result
 {
     private readonly Error? _error;
@@ -17,13 +19,17 @@ public class Result
     public static implicit operator Result(Error error) => new(error);
 }
 
-/// <summary>Outcome of a use case with a value.</summary>
+/// <summary>
+/// Outcome of a use case with a value.
+/// </summary>
 public sealed class Result<T> : Result
 {
     private readonly T? _value;
 
     private Result(T? value, Error? error)
         : base(error) => _value = value;
+
+    public static Result<T> FromValue(T value) => new(value, null);
 
     public T Value =>
         IsSuccess ? _value! : throw new InvalidOperationException("A failed result has no value.");

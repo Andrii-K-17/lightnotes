@@ -128,6 +128,7 @@ public static class DependencyInjection
         v1.MapMeEndpoints();
         v1.MapSyncEndpoints();
         v1.MapAttachmentEndpoints();
+        v1.MapAiEndpoints();
 
         if (app.Environment.IsDevelopment())
         {

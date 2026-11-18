@@ -9,6 +9,7 @@ public static class RateLimitPolicies
 {
     public const string Auth = "auth";
     public const string Sync = "sync";
+    public const string Ai = "ai";
 }
 
 internal static class RateLimitingExtensions
@@ -70,6 +71,22 @@ internal static class RateLimitingExtensions
                         _ => new FixedWindowRateLimiterOptions
                         {
                             PermitLimit = 60,
+                            Window = TimeSpan.FromMinutes(1),
+                            QueueLimit = 0,
+                        }
+                    )
+            );
+
+            options.AddPolicy(
+                RateLimitPolicies.Ai,
+                http =>
+                    RateLimitPartition.GetFixedWindowLimiter(
+                        http.User.FindFirstValue("sub")
+                            ?? http.Connection.RemoteIpAddress?.ToString()
+                            ?? "unknown",
+                        _ => new FixedWindowRateLimiterOptions
+                        {
+                            PermitLimit = 20,
                             Window = TimeSpan.FromMinutes(1),
                             QueueLimit = 0,
                         }

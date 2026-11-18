@@ -1,5 +1,7 @@
 using LightNotes.Application.Abstractions;
+using LightNotes.Application.Ai;
 using LightNotes.Application.Auth;
+using LightNotes.Infrastructure.Ai;
 using LightNotes.Infrastructure.Identity;
 using LightNotes.Infrastructure.Persistence;
 using LightNotes.Infrastructure.Storage;
@@ -7,6 +9,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace LightNotes.Infrastructure;
 
@@ -69,6 +72,27 @@ public static class DependencyInjection
             .ValidateOnStart();
 
         services.AddSingleton<IBlobStorage, FileSystemBlobStorage>();
+
+        services
+            .AddOptions<AiOptions>()
+            .BindConfiguration(AiOptions.SectionName)
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        services.AddHttpClient<IAiChatClient, OpenAiCompatibleClient>(
+            (provider, client) =>
+            {
+                var ai = provider.GetRequiredService<IOptions<AiOptions>>().Value;
+
+                client.BaseAddress = new Uri(ai.BaseUrl.TrimEnd('/') + "/");
+                client.Timeout = TimeSpan.FromSeconds(60);
+
+                if (ai.ApiKey.Length > 0)
+                {
+                    client.DefaultRequestHeaders.Authorization = new("Bearer", ai.ApiKey);
+                }
+            }
+        );
 
         return services;
     }
