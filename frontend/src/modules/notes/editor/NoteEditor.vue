@@ -122,7 +122,92 @@ function applyRemote(remoteTitle: string, document: RichText): void {
   }
 }
 
-defineExpose({ applyRemote })
+/** The range the last AI input came from; null when it was the whole note. */
+let aiRange: {
+  from: number
+  to: number
+} | null = null
+
+/** Text for an AI action: the selection, or the whole note when nothing is selected. */
+function aiInput(): {
+  text: string
+  selection: boolean
+} {
+  const instance = editor.value
+
+  if (!instance) {
+    return {
+      text: '',
+      selection: false,
+    }
+  }
+
+  const { from, to, empty } = instance.state.selection
+
+  if (!empty) {
+    aiRange = { from, to }
+
+    return {
+      text: instance.state.doc.textBetween(from, to, '\n'),
+      selection: true,
+    }
+  }
+
+  aiRange = null
+
+  return {
+    text: instance.getText({ blockSeparator: '\n' }),
+    selection: false,
+  }
+}
+
+/** Puts an AI result into the note as plain paragraphs, in one undo step. */
+function applyAi(text: string, mode: 'replace' | 'insert'): void {
+  const instance = editor.value
+  const paragraphs = text
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => ({
+      type: 'paragraph',
+      content: [
+        {
+          type: 'text',
+          text: line,
+        },
+      ],
+    }))
+
+  if (!instance || paragraphs.length === 0) {
+    return
+  }
+
+  const end = instance.state.doc.content.size
+  let range = { from: 0, to: end }
+
+  if (mode === 'replace' && aiRange) {
+    range = {
+      from: Math.min(aiRange.from, end),
+      to: Math.min(aiRange.to, end),
+    }
+  } else if (mode === 'insert') {
+    const position = aiRange ? instance.state.doc.resolve(Math.min(aiRange.to, end)) : null
+    const after = position && position.depth > 0 ? position.after(1) : end
+
+    range = {
+      from: after,
+      to: after,
+    }
+  }
+
+  instance.chain().focus().insertContentAt(range, paragraphs).run()
+}
+
+defineExpose({
+  applyRemote,
+  aiInput,
+  applyAi,
+})
 </script>
 
 <template>

@@ -200,5 +200,30 @@
     "waiting": "{count} change waiting | {count} changes waiting",
     "initial": "Syncing your notes… {count}",
     "conflict": "A conflicting edit was kept as a separate note."
+  },
+  "ai": {
+    "open": "AI assistant",
+    "title": "AI assistant",
+    "description": "Works on the selected text, or on the whole note if nothing is selected.",
+    "consentText": "To use AI, the text you choose is sent to an AI provider. Nothing is sent unless you run an action. You can withdraw your consent in Settings.",
+    "allow": "Allow AI features",
+    "improve": "Improve",
+    "summarize": "Summarize",
+    "translate": "Translate",
+    "translateTo": "Translate to",
+    "languages": {
+      "English": "English",
+      "Ukrainian": "Ukrainian",
+      "Polish": "Polish",
+      "German": "German"
+    },
+    "replace": "Replace",
+    "insert": "Insert below",
+    "copy": "Copy",
+    "copied": "Copied",
+    "retry": "Retry",
+    "stop": "Stop",
+    "nothing": "There is no text to work with.",
+    "offline": "AI needs an internet connection."
   }
 }

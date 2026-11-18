@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ArrowLeft } from '@lucide/vue'
+import { ArrowLeft, Sparkles } from '@lucide/vue'
 import { computed, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { Button } from '@/components/ui/button'
@@ -9,12 +9,17 @@ import NoteEditor from '../editor/NoteEditor.vue'
 import { useLiveQuery } from '@/lib/live-query'
 import NoteMenu from '../components/NoteMenu.vue'
 import NoteTags from '../editor/NoteTags.vue'
+import { AiPanel } from '@/modules/ai'
 
 const props = defineProps<{ id: string }>()
 
 const router = useRouter()
 const note = ref<NoteRecord>()
 const editor = useTemplateRef<InstanceType<typeof NoteEditor>>('editor')
+
+const aiOpen = ref(false)
+const getAiInput = () => editor.value?.aiInput() ?? { text: '', selection: false }
+const applyAi = (text: string, mode: 'replace' | 'insert') => editor.value?.applyAi(text, mode)
 
 /** The title and content (JSON string) that the editor currently reflects. */
 const known = { title: '', content: '' }
@@ -112,11 +117,22 @@ onBeforeUnmount(() => void leave(props.id))
           <ArrowLeft />
         </RouterLink>
       </Button>
-      <NoteMenu
-        v-if="liveNote"
-        :note="liveNote"
-        @trashed="router.replace({ name: 'home' })"
-      />
+
+      <div class="flex items-center">
+        <Button
+          variant="ghost"
+          size="icon"
+          :aria-label="$t('ai.open')"
+          @click="aiOpen = true"
+        >
+          <Sparkles />
+        </Button>
+        <NoteMenu
+          v-if="liveNote"
+          :note="liveNote"
+          @trashed="router.replace({ name: 'home' })"
+        />
+      </div>
     </header>
 
     <NoteEditor
@@ -137,5 +153,11 @@ onBeforeUnmount(() => void leave(props.id))
         />
       </template>
     </NoteEditor>
+
+    <AiPanel
+      v-model:open="aiOpen"
+      :get-input="getAiInput"
+      @apply="applyAi"
+    />
   </div>
 </template>
