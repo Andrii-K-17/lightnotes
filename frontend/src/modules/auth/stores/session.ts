@@ -119,6 +119,19 @@ export const useSessionStore = defineStore('session', () => {
     return restoring
   }
 
+  /** Grants or withdraws consent to send note text to the AI provider. */
+  async function setAiConsent(granted: boolean): Promise<void> {
+    await authApi.setAiConsent(granted)
+
+    if (profile.value) {
+      profile.value = {
+        ...profile.value,
+        aiConsent: granted,
+      }
+      writeCachedProfile(profile.value)
+    }
+  }
+
   return {
     status,
     profile,
@@ -130,5 +143,6 @@ export const useSessionStore = defineStore('session', () => {
     clear,
     refresh,
     restore,
+    setAiConsent,
   }
 })

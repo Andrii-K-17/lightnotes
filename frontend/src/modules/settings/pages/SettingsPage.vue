@@ -18,6 +18,20 @@ const signOutOpen = ref(false)
 const themes = ['auto', 'light', 'dark'] as const
 
 const signOutError = ref<string | null>(null)
+const aiError = ref<string | null>(null)
+
+async function toggleAi(event: Event): Promise<void> {
+  const input = event.target as HTMLInputElement
+
+  aiError.value = null
+
+  try {
+    await session.setAiConsent(input.checked)
+  } catch (error) {
+    input.checked = !input.checked
+    aiError.value = errorMessage(error instanceof ApiError ? error.code : 'unknown')
+  }
+}
 
 async function signOut(wipe: boolean): Promise<void> {
   signOutError.value = null
@@ -66,6 +80,30 @@ async function signOut(wipe: boolean): Promise<void> {
           {{ $t(`settings.theme.${mode}`) }}
         </Button>
       </div>
+    </section>
+
+    <section class="grid gap-3">
+      <h2 class="text-lg font-medium">
+        {{ $t('settings.aiTitle') }}
+      </h2>
+      <label class="flex items-start gap-3 text-sm">
+        <input
+          type="checkbox"
+          class="mt-0.5 size-4 accent-primary"
+          :checked="session.profile?.aiConsent"
+          @change="toggleAi"
+        />
+        <span>
+          {{ $t('settings.aiConsent') }}
+        </span>
+      </label>
+      <p
+        v-if="aiError"
+        role="alert"
+        class="text-sm text-destructive"
+      >
+        {{ aiError }}
+      </p>
     </section>
 
     <section class="grid gap-3">

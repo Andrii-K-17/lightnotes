@@ -15,4 +15,7 @@ export const authApi = {
   logout: () => unwrapEmpty(api.POST('/api/v1/auth/logout')),
 
   me: () => unwrap(api.GET('/api/v1/me')),
+
+  setAiConsent: (granted: boolean) =>
+    unwrapEmpty(api.PUT('/api/v1/me/ai-consent', { body: { granted } })),
 }

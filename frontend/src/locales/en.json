@@ -47,6 +47,14 @@
         "title": "Sign-in failed",
         "back": "Back to sign in"
       }
+    },
+    "ai": {
+      "consent_required": "Allow AI features first.",
+      "disabled": "AI is not available on this server.",
+      "input_too_large": "The text is too long for AI (up to 20000 characters).",
+      "empty_input": "There is no text to work with.",
+      "invalid_request": "This AI action is not supported.",
+      "provider_unavailable": "The AI service is unavailable right now. Please try again."
     }
   },
   "sidebar": {
@@ -163,7 +171,9 @@
     "signOutTitle": "Sign out?",
     "signOutDescription": "You can sign in again at any time.",
     "wipe": "Remove my notes from this device",
-    "unsynced": "{count} change has not been synced yet and will be lost. | {count} changes have not been synced yet and will be lost."
+    "unsynced": "{count} change has not been synced yet and will be lost. | {count} changes have not been synced yet and will be lost.",
+    "aiTitle": "AI assistant",
+    "aiConsent": "Allow sending the text I choose to the AI provider when I run an AI action"
   },
   "search": {
     "placeholder": "Search notes",
