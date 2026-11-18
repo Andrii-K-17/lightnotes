@@ -3,10 +3,16 @@ using LightNotes.Application.Common;
 namespace LightNotes.Application.Ai;
 
 /// <summary>
-/// <c>Action</c> is "improve", "summarize" or "translate".
-/// <c>Language</c> is the target of a translation.
+/// <para><c>Action</c> is "improve", "summarize", "translate" or "custom".</para>
+/// <para><c>Language</c> is the target of a translation.</para>
+/// <para><c>Instruction</c> is the user's own prompt for "custom".</para>
 /// </summary>
-public sealed record AiRequest(string Action, string Text, string? Language = null);
+public sealed record AiRequest(
+    string Action,
+    string Text,
+    string? Language = null,
+    string? Instruction = null
+);
 
 public interface IAiService
 {

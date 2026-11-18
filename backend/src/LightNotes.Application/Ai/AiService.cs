@@ -10,6 +10,8 @@ internal sealed class AiService(
     IAiChatClient client
 ) : IAiService
 {
+    private const int MaxInstructionCharacters = 1000;
+
     public async Task<Result<IAsyncEnumerable<string>>> RunAsync(
         AiRequest request,
         CancellationToken cancellationToken
@@ -34,14 +36,16 @@ internal sealed class AiService(
             return Error.Forbidden("ai.consent_required");
         }
 
+        var custom = request.Action == "custom";
         var text = request.Text.Trim();
+        var instruction = request.Instruction?.Trim() ?? "";
 
-        if (text.Length == 0)
+        if (custom ? instruction.Length == 0 : text.Length == 0)
         {
             return Error.Validation("ai.empty_input");
         }
 
-        if (text.Length > ai.MaxInputCharacters)
+        if (text.Length > ai.MaxInputCharacters || instruction.Length > MaxInstructionCharacters)
         {
             return Error.TooLarge("ai.input_too_large");
         }
@@ -53,6 +57,10 @@ internal sealed class AiService(
             return Error.Validation("ai.invalid_request");
         }
 
-        return await client.StreamAsync(system, AiPrompts.User(text), cancellationToken);
+        return await client.StreamAsync(
+            system,
+            AiPrompts.User(text, custom ? instruction : null),
+            cancellationToken
+        );
     }
 }
