@@ -34,8 +34,32 @@ const online = useOnline()
 
 const side = computed(() => (useMediaQuery('(min-width: 640px)').value ? 'right' : 'bottom'))
 
-const LANGUAGES = ['English', 'Ukrainian', 'Polish', 'German'] as const
-const language = ref<(typeof LANGUAGES)[number]>('English')
+const LANGUAGES = [
+  'English',
+  'Ukrainian',
+  'Polish',
+  'German',
+  'French',
+  'Spanish',
+  'Italian',
+  'Portuguese',
+  'Dutch',
+  'Czech',
+  'Slovak',
+  'Romanian',
+  'Swedish',
+  'Norwegian',
+  'Japanese',
+  'Korean',
+  'Chinese',
+  'Arabic',
+] as const
+
+const language = ref<string>('English')
+const customLanguage = ref('')
+const translationLanguage = computed(() =>
+  language.value === 'Custom' ? customLanguage.value.trim() : language.value,
+)
 
 const prompt = ref('')
 
@@ -70,7 +94,7 @@ async function run(action: AiAction): Promise<void> {
       {
         action,
         text: input.text,
-        language: action === 'translate' ? language.value : undefined,
+        language: action === 'translate' ? translationLanguage.value : undefined,
         instruction: action === 'custom' ? prompt.value.trim() : undefined,
       },
       (delta) => {
@@ -174,20 +198,32 @@ watch(open, (value) => {
         <div class="flex flex-wrap items-center gap-2">
           <select
             v-model="language"
-            class="h-9 rounded-md border bg-transparent px-2 text-sm"
+            class="h-9 rounded-md border border-input bg-popover px-2 text-sm text-popover-foreground dark:scheme-dark"
             :aria-label="$t('ai.translateTo')"
           >
             <option
               v-for="name in LANGUAGES"
               :key="name"
               :value="name"
+              class="bg-popover text-popover-foreground"
             >
               {{ $t(`ai.languages.${name}`) }}
             </option>
+            <option value="Custom" class="bg-popover text-popover-foreground">
+              {{ $t('ai.languages.Custom') }}
+            </option>
           </select>
+          <Input
+            v-if="language === 'Custom'"
+            v-model="customLanguage"
+            maxlength="40"
+            class="max-w-48"
+            :placeholder="$t('ai.customLanguage')"
+            :aria-label="$t('ai.customLanguage')"
+          />
           <Button
             variant="outline"
-            :disabled="running || !online"
+            :disabled="running || !online || (language === 'Custom' && !translationLanguage)"
             @click="run('translate')"
           >
             {{ $t('ai.translate') }}
