@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ArrowLeft, Sparkles } from '@lucide/vue'
+import { ArrowLeft, ChevronLeft, Sparkles, X } from '@lucide/vue'
 import { computed, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { Button } from '@/components/ui/button'
@@ -10,16 +10,34 @@ import { useLiveQuery } from '@/lib/live-query'
 import NoteMenu from '../components/NoteMenu.vue'
 import NoteTags from '../editor/NoteTags.vue'
 import { AiPanel } from '@/modules/ai'
+import { useNotesView } from '../stores/view'
 
 const props = defineProps<{ id: string }>()
 
 const router = useRouter()
+const view = useNotesView()
 const note = ref<NoteRecord>()
 const editor = useTemplateRef<InstanceType<typeof NoteEditor>>('editor')
 
 const aiOpen = ref(false)
 const getAiInput = () => editor.value?.aiInput() ?? { text: '', selection: false }
 const applyAi = (text: string, mode: 'replace' | 'insert') => editor.value?.applyAi(text, mode)
+
+function closeEditor(): void {
+  view.editorExpanded = false
+  view.middleHidden = false
+  void router.replace({ name: 'home' })
+}
+
+function expandEditor(): void {
+  view.editorExpanded = true
+  view.middleHidden = true
+}
+
+function shrinkEditor(): void {
+  view.editorExpanded = false
+  view.middleHidden = false
+}
 
 /** The title and content (JSON string) that the editor currently reflects. */
 const known = { title: '', content: '' }
@@ -104,13 +122,13 @@ onBeforeUnmount(() => void leave(props.id))
 </script>
 
 <template>
-  <div class="mx-auto max-w-3xl px-4 pb-24 pt-4">
+  <div class="mx-auto max-w-5xl px-4 pb-24 pt-4">
     <header class="mb-2 flex items-center justify-between">
       <Button
         as-child
         variant="ghost"
         size="icon"
-        class="sm:invisible"
+        class="sm:hidden"
         :aria-label="$t('common.back')"
       >
         <RouterLink :to="{ name: 'home' }">
@@ -118,7 +136,33 @@ onBeforeUnmount(() => void leave(props.id))
         </RouterLink>
       </Button>
 
-      <div class="flex items-center">
+      <div>
+        <Button
+          variant="ghost"
+          size="icon"
+          class="max-lg:hidden"
+          :aria-label="$t(view.editorExpanded ? 'view.shrinkEditor' : 'view.expandEditor')"
+          :title="$t(view.editorExpanded ? 'view.shrinkEditor' : 'view.expandEditor')"
+          @click="view.editorExpanded ? shrinkEditor() : expandEditor()"
+        >
+          <ChevronLeft
+            class="transition-transform duration-300 ease-in-out"
+            :class="{ 'rotate-180': view.editorExpanded }"
+          />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          class="max-lg:hidden"
+          :aria-label="$t('view.closeEditor')"
+          :title="$t('view.closeEditor')"
+          @click="closeEditor"
+        >
+          <X />
+        </Button>
+      </div>
+
+      <div class="flex">
         <Button
           variant="ghost"
           size="icon"

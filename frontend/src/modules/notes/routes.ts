@@ -3,13 +3,9 @@ import type { RouteRecordRaw } from 'vue-router'
 export const notesRoutes: RouteRecordRaw[] = [
   {
     path: '/',
+    name: 'home',
     component: () => import('./layout/NotesShell.vue'),
     children: [
-      {
-        path: '',
-        name: 'home',
-        component: () => import('./pages/NoNoteSelected.vue'),
-      },
       {
         path: 'notes/:id',
         name: 'note',

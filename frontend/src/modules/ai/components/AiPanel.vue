@@ -209,7 +209,10 @@ watch(open, (value) => {
             >
               {{ $t(`ai.languages.${name}`) }}
             </option>
-            <option value="Custom" class="bg-popover text-popover-foreground">
+            <option
+              value="Custom"
+              class="bg-popover text-popover-foreground"
+            >
               {{ $t('ai.languages.Custom') }}
             </option>
           </select>

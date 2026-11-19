@@ -9,6 +9,8 @@ export const useNotesView = defineStore('notes-view', () => {
   const sort = useStorage<NoteSort>('lightnotes.sort', DEFAULT_SORT)
   const viewMode = useStorage<'grid' | 'list'>('lightnotes.viewMode', 'grid')
   const query = ref('')
+  const middleHidden = ref(false)
+  const editorExpanded = ref(false)
 
   function select(next: NoteScope): void {
     scope.value = next
@@ -30,6 +32,8 @@ export const useNotesView = defineStore('notes-view', () => {
     sort,
     viewMode,
     query,
+    middleHidden,
+    editorExpanded,
     select,
     toggleTag,
     clearTags,
