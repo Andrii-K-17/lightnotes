@@ -2,6 +2,7 @@
 import {
   Bold,
   Code,
+  Code2,
   Heading1,
   Heading2,
   Heading3,
@@ -44,6 +45,28 @@ const isActive = (name: string, attributes?: Record<string, unknown>) =>
   props.editor.isActive(name, attributes)
 const inList = () => isActive('listItem') || isActive('taskItem')
 const itemType = () => (isActive('taskItem') ? 'taskItem' : 'listItem')
+const codeLanguages = [
+  'plaintext',
+  'javascript',
+  'typescript',
+  'python',
+  'go',
+  'csharp',
+  'java',
+  'php',
+  'ruby',
+  'rust',
+  'html',
+  'css',
+  'json',
+  'bash',
+  'sql',
+  'yaml',
+] as const
+
+function setCodeLanguage(language: string): void {
+  chain().updateAttributes('codeBlock', { language }).run()
+}
 
 const groups: Action[][] = [
   [
@@ -165,10 +188,17 @@ const groups: Action[][] = [
     },
     {
       id: 'code',
-      icon: Code,
+      icon: Code2,
       label: 'editor.code',
       active: () => isActive('code'),
       run: () => chain().toggleCode().run(),
+    },
+    {
+      id: 'codeBlock',
+      icon: Code,
+      label: 'editor.codeBlock',
+      active: () => isActive('codeBlock'),
+      run: () => chain().toggleCodeBlock().run(),
     },
   ],
 ]
@@ -258,6 +288,22 @@ function onPicked(event: Event): void {
       role="toolbar"
       :aria-label="$t('editor.toolbar')"
     >
+      <select
+        v-if="editor.isActive('codeBlock')"
+        :value="editor.getAttributes('codeBlock').language || 'plaintext'"
+        class="h-8 shrink-0 rounded-md border border-input bg-popover px-2 text-sm text-popover-foreground dark:scheme-dark"
+        :aria-label="$t('editor.codeLanguage')"
+        @change="setCodeLanguage(($event.target as HTMLSelectElement).value)"
+      >
+        <option
+          v-for="language in codeLanguages"
+          :key="language"
+          :value="language"
+          class="bg-popover text-popover-foreground"
+        >
+          {{ language }}
+        </option>
+      </select>
       <template
         v-for="(group, index) in groups"
         :key="index"

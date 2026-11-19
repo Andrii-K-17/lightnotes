@@ -148,6 +148,8 @@
     "heading3": "Heading 3",
     "quote": "Quote",
     "code": "Code",
+    "codeBlock": "Code block",
+    "codeLanguage": "Code language",
     "link": "Link",
     "undo": "Undo",
     "redo": "Redo",
