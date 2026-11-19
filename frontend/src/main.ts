@@ -5,7 +5,9 @@ import '@fontsource-variable/plus-jakarta-sans'
 import './main.css'
 
 import App from '@/app/App.vue'
+import { registerPwa } from '@/app/pwa'
 import { router } from '@/app/router'
+import { listenForInstall } from '@/lib/pwa-install'
 import { installAuth } from './modules/auth'
 
 const app = createApp(App)
@@ -19,5 +21,8 @@ installAuth(() =>
 )
 app.use(router)
 app.use(i18n)
+
+listenForInstall()
+registerPwa()
 
 app.mount('#app')

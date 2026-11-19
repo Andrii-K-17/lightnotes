@@ -2,6 +2,16 @@
   "app": {
     "name": "LightNotes"
   },
+  "pwa": {
+    "update": "A new version is available.",
+    "reload": "Reload",
+    "offlineReady": "LightNotes is ready to work offline.",
+    "installPrompt": "Install LightNotes to open it offline and keep your notes safe on this device.",
+    "install": "Install",
+    "later": "Not now",
+    "iosHint": "To install LightNotes, tap Share, then “Add to Home Screen”.",
+    "gotIt": "Got it"
+  },
   "auth": {
     "email": "Email",
     "password": "Password",
@@ -173,7 +183,8 @@
     "wipe": "Remove my notes from this device",
     "unsynced": "{count} change has not been synced yet and will be lost. | {count} changes have not been synced yet and will be lost.",
     "aiTitle": "AI assistant",
-    "aiConsent": "Allow sending the text I choose to the AI provider when I run an AI action"
+    "aiConsent": "Allow sending the text I choose to the AI provider when I run an AI action",
+    "install": "Install the app"
   },
   "search": {
     "placeholder": "Search notes",

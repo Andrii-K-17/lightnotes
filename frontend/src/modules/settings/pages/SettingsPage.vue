@@ -8,12 +8,14 @@ import { errorMessage } from '@/i18n/errors'
 import { ApiError } from '@/lib/api'
 import SignOutDialog from '../components/SignOutDialog.vue'
 import { useSyncStore } from '@/modules/sync'
+import { useInstall } from '@/lib/pwa-install'
 
 const router = useRouter()
 const session = useSessionStore()
 const theme = useTheme()
 const sync = useSyncStore()
 const signOutOpen = ref(false)
+const { canInstall, needsManualInstall, install } = useInstall()
 
 const themes = ['auto', 'light', 'dark'] as const
 
@@ -104,6 +106,25 @@ async function signOut(wipe: boolean): Promise<void> {
       >
         {{ aiError }}
       </p>
+    </section>
+
+    <section
+      v-if="canInstall || needsManualInstall"
+      class="grid gap-3"
+    >
+      <h2 class="text-lg font-medium">
+        {{ $t('settings.install') }}
+      </h2>
+      <p class="text-sm text-muted-foreground">
+        {{ needsManualInstall ? $t('pwa.iosHint') : $t('pwa.installPrompt') }}
+      </p>
+      <Button
+        v-if="canInstall"
+        class="w-fit"
+        @click="install"
+      >
+        {{ $t('pwa.install') }}
+      </Button>
     </section>
 
     <section class="grid gap-3">
